@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Cómo te sientes hoy? 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#ffe3ee;--bg2:#e8dcff;--card:rgba(255,255,255,.75);--text:#4a2a45;--soft:#8a6584;--pink:#ff5c9d;--pink2:#ff8fc0;--chip:#fff;--line:#ffc6dd;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2b1630;--bg2:#1c1a3a;--card:rgba(50,30,60,.75);--text:#ffe9f3;--soft:#c9a3c4;--chip:#3d2447;--line:#6b3a73;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:'Nunito',system-ui,sans-serif;color:var(--text);background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;overflow-x:hidden}
+.floaty{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.floaty span{position:absolute;bottom:-40px;opacity:.55;animation:up linear infinite}
+@keyframes up{to{transform:translateY(-110vh) rotate(40deg);opacity:0}}
+main{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:28px 18px 60px}
+h1{font-family:'Pacifico',cursive;font-weight:400;font-size:2.2rem;text-align:center;margin:8px 0 4px;color:var(--pink)}
+.sub{text-align:center;color:var(--soft);margin:0 0 22px}
+.card{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:26px;padding:20px;margin-bottom:18px;box-shadow:0 10px 30px rgba(255,92,157,.15);animation:in .6s both}
+.card:nth-of-type(2){animation-delay:.1s}.card:nth-of-type(3){animation-delay:.2s}
+@keyframes in{from{opacity:0;transform:translateY(20px)}}
+h2{margin:0 0 14px;font-size:1.1rem}
+.moods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mood,.chip{border:2px solid var(--line);background:var(--chip);color:var(--text);font:inherit;border-radius:20px;cursor:pointer;transition:.2s}
+.mood{padding:12px 4px;font-weight:700;font-size:.85rem}
+.mood b{display:block;font-size:2rem;transition:.25s}
+.mood:hover b{transform:scale(1.25) rotate(-6deg)}
+.mood.on{border-color:var(--pink);background:linear-gradient(135deg,var(--pink2),var(--pink));color:#fff;transform:scale(1.05);box-shadow:0 8px 20px rgba(255,92,157,.4)}
+.mood.on b{animation:bounce .6s}
+@keyframes bounce{40%{transform:scale(1.5)}70%{transform:scale(.9)}}
+.range{margin-top:16px;display:none}.range.show{display:block}
+input[type=range]{width:100%;accent-color:var(--pink)}
+.lab{display:flex;justify-content:space-between;font-size:.8rem;color:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:10px 14px;font-weight:700;font-size:.92rem}
+.chip:hover{transform:translateY(-2px)}
+.chip.on{border-color:var(--pink);background:var(--pink);color:#fff;animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.12)}}
+textarea{width:100%;min-height:100px;border:2px solid var(--line);border-radius:18px;padding:14px;font:inherit;background:var(--chip);color:var(--text);resize:vertical}
+textarea:focus{outline:none;border-color:var(--pink)}
+#send{display:block;text-align:center;text-decoration:none;width:100%;border:0;border-radius:999px;padding:17px;font:inherit;font-weight:800;font-size:1.1rem;color:#fff;background:linear-gradient(135deg,#25d366,#128c7e);cursor:pointer;box-shadow:0 10px 24px rgba(37,211,102,.4);transition:.2s}
+#send:hover{transform:scale(1.03)}
+#send.dis{filter:grayscale(.8);opacity:.5;cursor:not-allowed;transform:none;pointer-events:none}
+.hint{text-align:center;color:var(--soft);font-size:.82rem;margin-top:10px;min-height:1.2em}
+.jbtn{border:0;border-radius:999px;padding:13px 22px;font:inherit;font-weight:800;color:#fff;background:linear-gradient(135deg,#ffb347,#ff5c9d);cursor:pointer;box-shadow:0 8px 20px rgba(255,92,157,.35);transition:.2s}
+.jbtn:hover{transform:scale(1.05)}
+#joke{display:none;margin-top:16px;padding:16px;border-radius:18px;background:var(--chip);border:2px dashed var(--pink2);text-align:center;animation:pop .4s}
+#joke .q{font-weight:800;margin-bottom:8px}
+#joke .a{color:var(--pink);font-weight:800;font-size:1.05rem;margin-bottom:12px}
+.jr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.jr button{border:2px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
+.epick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.epick button{border:0;background:var(--chip);border-radius:12px;font-size:1.3rem;padding:4px 8px;cursor:pointer;transition:.15s}
+.epick button:hover{transform:scale(1.3)}
+.detect{margin-top:10px;min-height:1.6em;font-size:.9rem;color:var(--soft)}
+.detect span{font-size:1.7rem;display:inline-block;animation:pop .4s;margin:0 2px}
+.moodmsg{margin-top:14px;text-align:center;font-weight:800;color:var(--pink);min-height:1.4em;animation:pop .4s}
+.heart{position:fixed;pointer-events:none;z-index:9;font-size:1.4rem;animation:burst 1s ease-out forwards}
+@keyframes burst{to{transform:translate(var(--x),var(--y)) scale(1.6);opacity:0}}
+.thanks{display:none;text-align:center;padding:30px 10px}
+.thanks .big{font-size:4rem;animation:bounce 1s infinite}
+</style>
+</head>
+<body>
+<div class="floaty" id="floaty"></div>
+<main>
+  <h1 id="title">Hola, mi amor 💖</h1>
+  <p class="sub">Cuéntame cómo te sientes y qué necesitas, yo estoy aquí para ti.</p>
+
+  <section class="card">
+    <h2>1. ¿Cómo te sientes hoy?</h2>
+    <div class="moods" id="moods"></div>
+    <div class="moodmsg" id="moodmsg"></div>
+    <div class="range" id="range">
+      <div class="lab"><span>Un poquito</span><span id="rv">5 / 10</span><span>Muchísimo</span></div>
+      <input type="range" id="level" min="1" max="10" value="5">
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. ¿Qué necesitas? (puedes elegir varias)</h2>
+    <div class="chips" id="needs"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Dime lo que quieras 💌</h2>
+    <textarea id="note" placeholder="Escribe aquí con confianza…"></textarea>
+    <div class="epick" id="epick"></div>
+    <div class="detect" id="detect"></div>
+  </section>
+
+  <section class="card" style="text-align:center">
+    <h2>4. ¿Quieres un chistecito? 😂</h2>
+    <button class="jbtn" id="jb">Cuéntame un chiste</button>
+    <div id="joke"><div class="q" id="jq"></div><div class="a" id="ja"></div><div class="jr"><button id="jl">😂 Me dio risa</button><button id="jm">🙄 Qué malo</button><button id="jn">Otro 🎲</button></div></div>
+  </section>
+
+  <a id="send" class="dis" href="#" target="_blank" rel="noopener">Enviarle mi corazón por WhatsApp 💚</a>
+  <div class="hint" id="hint">Elige cómo te sientes para continuar</div>
+
+  <div class="card" id="fb" style="display:none;text-align:center"><h2>¿No se abrió WhatsApp? Sin problema 💕</h2><p style="font-size:.9rem;color:var(--soft);margin-top:0">Usa uno de estos botones:</p><div class="jr"><a class="jbtn" id="w1" target="_blank" rel="noopener" style="text-decoration:none">Abrir WhatsApp</a><a class="jbtn" id="w2" style="text-decoration:none">Abrir la app</a><button class="jbtn" id="cp">Copiar mensaje</button></div><textarea id="msg" readonly style="margin-top:14px;min-height:140px"></textarea><p style="font-size:.85rem;color:var(--soft)">Si copias el mensaje, pégalo en el chat con tu amor y envíalo 💌</p></div>
+
+  <div class="card thanks" id="thanks"><div class="big">🥰</div><h2>¡Listo, mi amor!</h2><p>Si WhatsApp se abrió, solo toca <b>enviar</b> y ya me llega tu mensaje. Te quiero muchísimo.</p></div>
+</main>
+<script>
+// ====== CONFIGURA AQUÍ ======
+var PHONE = "573128557577";   // Tu número con código de país, sin + ni espacios (Colombia = 57)
+var HER_NAME = "Mariana"; var NICK = "pototito";
+var HIS_NAME = "";            // Tu nombre (opcional)
+// ============================
+var MOODS=[["😊","Feliz"],["🥰","Enamorada"],["😴","Cansada"],["😢","Triste"],["😤","Molesta"],["😰","Ansiosa"],["🥺","Sensible"],["😶","Sin ganas"],["🤒","Mal del cuerpo"]];
+var NEEDS=[["🤗","Un abrazo"],["📞","Que me llames"],["🍫","Un antojo"],["👂","Que me escuches"],["🎬","Plan de película"],["🌹","Un detalle"],["🫶","Mimos"],["🤫","Espacio y silencio"],["🍕","Comida rica"],["🚶","Salir a pasear"],["😂","Que me hagas reír"],["💬","Palabras bonitas"]];
+var mood=null,needs=[];
+var $=function(i){return document.getElementById(i)};
+$("title").textContent="Hola, "+NICK+" 💖";
+MOODS.forEach(function(m){var b=document.createElement("button");b.className="mood";b.innerHTML="<b>"+m[0]+"</b>"+m[1];b.onclick=function(){document.querySelectorAll(".mood").forEach(function(x){x.classList.remove("on")});b.classList.add("on");mood=m;$("range").classList.add("show");burst(b,m[0]);setTheme(m[1]);upd()};$("moods").appendChild(b)});
+NEEDS.forEach(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n[0]+" "+n[1];b.onclick=function(){var i=needs.indexOf(n);if(i<0){needs.push(n);b.classList.add("on");burst(b,n[0])}else{needs.splice(i,1);b.classList.remove("on")}upd()};$("needs").appendChild(b)});
+$("level").oninput=function(){$("rv").textContent=this.value+" / 10 "+bar(this.value)};
+function upd(){var ok=!!mood;refresh();$("hint").textContent=ok?(needs.length?"¡Perfecto! Ya puedes enviarlo 💕":"Ahora elige qué necesitas (o escríbelo abajo)"):"Elige cómo te sientes para continuar"}
+function burst(el,e){var r=el.getBoundingClientRect();for(var i=0;i<8;i++){var h=document.createElement("div");h.className="heart";h.textContent=i%2?e:"💗";h.style.left=(r.left+r.width/2)+"px";h.style.top=(r.top+r.height/2)+"px";h.style.setProperty("--x",(Math.random()*160-80)+"px");h.style.setProperty("--y",(-Math.random()*130-20)+"px");document.body.appendChild(h);setTimeout(function(x){x.remove()},1000,h)}}
+function buildMsg(){
+  var t="💌 *ALERTA DE AMOR* 💌\n"+(HER_NAME?HER_NAME+" te escribe:\n":"")+"\n*Me siento:* "+mood[0]+" "+mood[1]+" ("+$("level").value+"/10) "+bar($("level").value)+"\n";
+  t+="*Necesito:* "+(needs.length?needs.map(function(n){return n[0]+" "+n[1]}).join(", "):"—")+"\n";
+  var note=$("note").value.trim();if(note)t+="\n*Te quiero decir:* "+note+" "+detFlat(note).join("")+"\n";
+  if(jokesSeen)t+="\n😂 Chistes: "+jokesSeen+" | Me dieron risa: "+laughs+"\n";
+  t+="\nTe quiero 💖";
+  return t;
+}
+function links(){var m=encodeURIComponent(buildMsg());return ["https://wa.me/"+PHONE+"?text="+m,"whatsapp://send?phone="+PHONE+"&text="+m]}
+function refresh(){var a=$("send");a.classList.toggle("dis",!mood);a.href=mood?links()[0]:"#"}
+$("send").addEventListener("click",function(e){
+  if(!mood){e.preventDefault();return}
+  var l=links();this.href=l[0];$("w1").href=l[0];$("w2").href=l[1];$("msg").value=buildMsg();
+  $("fb").style.display="block";$("thanks").style.display="block";
+  setTimeout(function(){$("fb").scrollIntoView({behavior:"smooth",block:"center"})},400);
+  for(var i=0;i<4;i++)burst(this,"💖");
+});
+$("cp").onclick=function(){var t=buildMsg(),b=this;function ok(){b.textContent="¡Copiado! ✅"}
+  function old(){var m=$("msg");m.value=t;m.select();try{document.execCommand("copy");ok()}catch(e){b.textContent="Mantén presionado el texto y copia"}}
+  try{navigator.clipboard.writeText(t).then(ok,old)}catch(e){old()}};
+$("note").addEventListener("input",function(){refresh();showDet()});$("level").addEventListener("input",refresh);
+var TH={"Feliz":["😊","🌞","🎉","💛","✨","🌈"],"Enamorada":["💖","💘","😍","🌹","💕","🦋"],"Cansada":["😴","🌙","💤","☁️","🛏️","🫂"],"Triste":["🌧️","💧","🤍","🫂","🥺","🌈"],"Molesta":["🔥","😤","💢","🌋","⚡","🫂"],"Ansiosa":["🍃","🫁","🌊","💙","🕊️","🌸"],"Sensible":["🥺","🫂","🌷","💗","🤍","🧸"],"Sin ganas":["🛋️","🍿","☁️","🐌","💤","🧸"],"Mal del cuerpo":["🤒","🍵","💊","🫂","❤️‍🩹","🍲"]};
+var MM={"Feliz":"¡Qué bonito! Tu felicidad me contagia 🎉","Enamorada":"Yo también estoy enamorado de ti 💘","Cansada":"Descansa, mi amor, te lo mereces 😴","Triste":"Aquí estoy contigo, no estás sola 🫂","Molesta":"Respira, cuéntame todo, te escucho 🔥➡️💙","Ansiosa":"Respira conmigo: todo va a estar bien 🍃","Sensible":"Te voy a llenar de mimos 🧸","Sin ganas":"Pues manta, peli y abrazo, ¿qué dices? 🍿","Mal del cuerpo":"Pobrecita, ya mismo te cuido 🍵"};
+function bar(n){return mood?new Array(Math.ceil(n/3)+1).join(mood[0]):""}
+function setTheme(k){var f=$("floaty"),s=TH[k]||["💖"];f.innerHTML="";for(var i=0;i<24;i++){var e=document.createElement("span");e.textContent=s[i%s.length];e.style.left=Math.random()*100+"%";e.style.fontSize=(16+Math.random()*26)+"px";e.style.animationDuration=(7+Math.random()*9)+"s";e.style.animationDelay=(-Math.random()*12)+"s";f.appendChild(e)}
+  $("moodmsg").textContent=MM[k]||"";$("level").oninput()}
+var KW=[[/te quiero|te amo|amor|carino/,["❤️","💞"]],[/triste|llor|mal el dia/,["😢","💔"]],[/cansad|sueno|dormir|siesta/,["😴","🌙"]],[/hambre|comer|comida|almuerzo|cena/,["🍔","😋"]],[/pizza/,["🍕"]],[/helado/,["🍦"]],[/dulce|chocolate|postre/,["🍫","🍰"]],[/abraz/,["🤗","🫂"]],[/beso/,["😘","💋"]],[/extran|falta/,["🥺","💭"]],[/rabia|molest|bravo|enojad/,["😤","🔥"]],[/feliz|content|alegre/,["😊","🎉"]],[/pelicula|serie|netflix|cine/,["🎬","🍿"]],[/llama|llamada|hablar/,["📞"]],[/salir|pasear|caminar|parque/,["🚶‍♀️","🌳"]],[/flores|detalle|regalo|sorpresa/,["🌹","🎁"]],[/enferm|dolor|gripa|fiebre/,["🤒","💊"]],[/miedo|ansios|nerv|estres/,["😰","🍃"]],[/gracias/,["🙏","💕"]],[/mimos|consent/,["🫂","🧸"]],[/cafe/,["☕"]],[/playa|mar |vacaciones/,["🏖️"]],[/musica|cantar|bailar/,["🎶"]],[/ayuda|ayudame/,["🆘","🫂"]],[/lindo|lind|bonit|hermos/,["🌸","✨"]],[/risa|chiste|gracios/,["😂"]],[/compras|ropa|vestido/,["🛍️","👗"]],[/estudi|trabajo|tarea/,["📚","💪"]]];
+function detFlat(s){s=s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");var o=[];KW.forEach(function(k){if(k[0].test(s))k[1].forEach(function(e){if(o.indexOf(e)<0)o.push(e)})});return o}
+var lastDet="";
+function showDet(){var d=detFlat($("note").value),box=$("detect"),key=d.join("");box.textContent=d.length?"Tus palabras hacen aparecer: ":"";d.forEach(function(e){var s=document.createElement("span");s.textContent=e;box.appendChild(s)});if(d.length&&key!==lastDet)burst($("note"),d[d.length-1]);lastDet=key}
+"❤️,😘,🥰,😭,😂,🥺,😴,🍕,🍫,🤗,🌹,🔥,💋,🫂,😤,✨".split(",").forEach(function(e){var b=document.createElement("button");b.textContent=e;b.onclick=function(){var n=$("note");n.value+=e;n.focus();refresh();showDet();burst(b,e)};$("epick").appendChild(b)});
+var JOKES=[["¿Qué le dice un techo a otro techo?","Techo de menos 🥹"],["¿Qué hace una abeja en el gimnasio?","¡Zum-ba! 🐝"],["¿Cómo se despiden los químicos?","Ácido un placer 🧪"],["¿Cuál es el café más peligroso del mundo?","El ex-preso ☕"],["¿Qué le dice una iguana a su hermana gemela?","Somos iguanitas 🦎"],["¿Qué le dijo el corazón al cerebro?","Tú piensa, que yo la quiero a ella 💘"],["¿Qué tienen en común tú y mi WiFi?","Que sin ti me desconecto 📶"],["¿Cómo se llama el campeón japonés de buceo?","Tokofondo 🤿 (y el subcampeón: Kasi Kito)"],["¿Qué le dice una taza a otra?","¿Qué tazaciendo? ☕"],["¿Por qué el libro de mate está triste?","Porque tiene muchos problemas 📘"],["¿Qué le dice un gusano a otro?","Voy a dar una vuelta a la manzana 🍎"],["¿Cuál es el colmo de un electricista?","Que su esposa se llame Luz y sus hijos le sigan la corriente ⚡"],["¿Qué le dice un jaguar a otro?","¿Jaguar you? 🐆"],["¿Por qué las focas miran siempre hacia arriba?","¡Porque ahí están los focos! 💡"]];
+var laughs=0,jokesSeen=0;
+JOKES=JOKES.concat(`¿Qué le dice un semáforo a otro?|No me mires, me estoy cambiando 🚦
+¿Cuál es el colmo de un jardinero?|Que su novia se llame Rosa y lo deje plantado 🌹
+¿Cuál es el colmo de un astronauta?|Que su novia le diga: «necesito más espacio» 🚀
+¿Cuál es el colmo de un pez?|Que le dé sed 🐟
+¿Cuál es el colmo de un fotógrafo?|Que su relación se quede en negativo 📷
+¿Cuál es el colmo de Aladdín?|Tener mal genio 🧞
+¿Cuál es el colmo de un músico?|Que su novia lo deje y se quede sin notas 🎵
+¿Qué le dice una vaca a otra?|¡Muuucho gusto! 🐄
+¿Qué le dice una pared a otra?|Nos vemos en la esquina 🧱
+¿Qué le dice un pez a otro?|¡Nada! 🐟
+¿Qué le dice el pan al queso?|Eres el queso de mi vida 🧀
+¿Qué le dice una bombilla a otra?|Me tienes encendida 💡
+¿Qué le dice un cable a otro?|Somos la conexión perfecta 🔌
+¿Qué le dice el cero al ocho?|¡Qué cinturón tan bonito! 0️⃣
+¿Por qué el tomate se puso rojo?|Porque vio a la ensalada desvestirse 🍅
+¿Qué le dice una calculadora a otra?|Contamos contigo 🧮
+¿Cómo se dice pañuelo en japonés?|Saka-moko 🤧
+¿Cómo se dice pelo sucio en chino?|Chin cham pu 🧴
+¿Qué es un punto verde en la esquina?|Una arveja castigada 🟢
+¿Por qué los esqueletos no pelean?|Porque no tienen agallas 💀
+¿Qué hace un pollo en el ascensor?|¡Pío piso! 🐔
+¿Cuál es el animal más antiguo?|La cebra, porque está en blanco y negro 🦓
+¿Qué le dice un café a una dona?|Contigo me caliento ☕🍩
+¿Cuál es el planeta favorito de los enamorados?|La Tierra, porque ahí estás tú 🌍
+¿Qué le dice un huevo a otro?|Nos vemos en el desayuno 🍳
+¿Cuántos besos caben en un abrazo?|Todos los que tú quieras, pototito 😘
+Si fueras una fruta, ¿cuál serías?|Una fresa, porque contigo todo es dulce 🍓
+¿Qué le falta a mi cama?|Una cobija humana: tú 🥰
+¿Qué hace una abeja con un celular?|¡Zumbido de llamada! 🐝
+¿Por qué el astronauta terminó con la luna?|Porque necesitaba más espacio 🌙`.split('\n').map(function(s){return s.split('|')}));
+var R=function(a){return a[Math.floor(Math.random()*a.length)]},N=function(a,b){return a+Math.floor(Math.random()*(b-a+1))};
+var A1=['bonita','linda','preciosa','hermosa','divina','tierna','radiante','brillante','encantadora','graciosa'];
+var B1=['el sol te pidió tu número ☀️','mi WiFi se conecta solo 📶','Google Maps te marcó como «destino favorito»','hasta el café quiere ser tú ☕','el espejo te pidió autógrafo','las estrellas se pusieron celosas ⭐','mi corazón hizo horas extras 💓','Netflix te recomendó a ti en vez de películas','la luna se fue a dormir apenada 🌙','mi celular no quiere otro fondo de pantalla','los gatos te siguen en Instagram 🐱','las flores te piden consejos 🌷','hasta mi pereza se levanta por ti','el chocolate se derritió de envidia 🍫','mi estómago dejó de pedir comida por mirarte','la lluvia salió a verte 🌧️','los emojis se quedaron cortos','la pizza te pidió ser su porción favorita 🍕','el cielo te copió el color'];
+var E2=['que hoy me quieras más que ayer','que te dé un antojo de dulce 🍫','que me pidas un abrazo 🤗','que te rías sola mirando el celular','que digas «no tengo hambre» y te comas mi comida 🍟','que quieras pizza esta noche 🍕','que me extrañes en los próximos 5 minutos','que te quedes dormida viendo una serie 😴','que me robes la cobija 🛏️','que hoy alguien te diga que estás linda (y es verdad)','que quieras helado aunque haga frío 🍦','que me mandes 15 audios seguidos 🎙️','que digas «ya casi salgo» y sigas en la cama','que me hagas reír hoy 😂','que te suene el estómago en un momento romántico'];
+var L3=['Nivel de ternura','Nivel de hambre','Nivel de sueño','Nivel de ganas de abrazos','Nivel de antojo de dulce','Nivel de belleza','Nivel de pereza','Nivel de ganas de pizza','Nivel de risa','Nivel de ganas de mimos'];
+var R4=['porque me haces reír hasta cuando estoy serio','por tu risa que alegra mi día','por cómo te emocionas con la comida 🍕','porque eres mi lugar seguro 🏡','por tus abrazos que arreglan todo','por cómo me miras','porque contigo hasta el trancón es lindo 🚗','porque eres mi persona favorita','por lo linda que te ves dormida 😴','porque me aguantas con paciencia','por tus ocurrencias','porque contigo todo sabe mejor 🍰'];
+var GENS=[function(){return ['¿Qué tan linda estás hoy, pototito?','Estás tan '+R(A1)+' que '+R(B1)]},function(){return ['🔮 Predicción especial para pototito','Hay un '+N(40,99)+'% de probabilidad de '+R(E2)]},function(){var l=R(L3),n=N(1,150);return ['📊 Medidor oficial de pototito',l+': '+n+'%'+(n>100?' (¡se pasó del límite! 🚨)':'')]},function(){return ['💖 Una razón por la que te quiero','Razón #'+N(1,999)+': '+R(R4)]}];
+var seen=[];try{seen=JSON.parse(localStorage.getItem('seenJ')||'[]')}catch(e){}
+function pick(){var j,k,t=0;do{j=Math.random()<.4?R(JOKES):R(GENS)();k=j[0]+j[1];t++}while(seen.indexOf(k)>=0&&t<60);seen.push(k);if(seen.length>300)seen.shift();try{localStorage.setItem('seenJ',JSON.stringify(seen))}catch(e){}return j}
+function nextJoke(){var j=pick();jokesSeen++;$('jq').textContent=j[0];$('ja').textContent=j[1];$("joke").style.display="block";$("joke").style.animation="none";void $("joke").offsetWidth;$("joke").style.animation=""}
+$("jb").onclick=nextJoke;$("jn").onclick=nextJoke;
+$("jl").onclick=function(){laughs++;burst(this,"😂")};
+$("jm").onclick=function(){burst(this,"🙄")};
+var f=$("floaty"),em=["💗","💖","✨","🌸","💕","🦋"];
+for(var i=0;i<16;i++){var s=document.createElement("span");s.textContent=em[i%em.length];s.style.left=Math.random()*100+"%";s.style.fontSize=(14+Math.random()*22)+"px";s.style.animationDuration=(9+Math.random()*10)+"s";s.style.animationDelay=(-Math.random()*15)+"s";f.appendChild(s)}
+</script>
+</body>
+</html>
