@@ -56,6 +56,16 @@ textarea:focus{outline:none;border-color:var(--pink)}
 .detect{margin-top:10px;min-height:1.6em;font-size:.9rem;color:var(--soft)}
 .detect span{font-size:1.7rem;display:inline-block;animation:pop .4s;margin:0 2px}
 .moodmsg{margin-top:14px;text-align:center;font-weight:800;color:var(--pink);min-height:1.4em;animation:pop .4s}
+.slist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.sitem{text-align:left;border:2px solid var(--line);background:var(--chip);color:var(--text);border-radius:16px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer;transition:.2s}
+.sitem:hover{border-color:var(--pink);transform:translateX(4px)}
+#reader{display:none;margin-top:18px;padding:18px;border-radius:20px;background:var(--chip);border:2px solid var(--line)}
+#reader.night{background:#12102a;color:#f3e9d2;border-color:#3b3566}
+#reader h3{font-family:'Pacifico',cursive;font-weight:400;color:var(--pink);margin:0 0 10px;text-align:center;font-size:1.35rem}
+#reader .jr{margin-bottom:14px}
+#stext{line-height:1.75;font-size:1.05rem;text-align:left}
+#stext p{margin:0 0 12px}
+#sdone{display:none;text-align:center;margin-top:14px;font-weight:800;color:var(--pink)}
 .heart{position:fixed;pointer-events:none;z-index:9;font-size:1.4rem;animation:burst 1s ease-out forwards}
 @keyframes burst{to{transform:translate(var(--x),var(--y)) scale(1.6);opacity:0}}
 .thanks{display:none;text-align:center;padding:30px 10px}
@@ -69,7 +79,7 @@ textarea:focus{outline:none;border-color:var(--pink)}
   <p class="sub">Cuéntame cómo te sientes y qué necesitas, yo estoy aquí para ti.</p>
 
   <section class="card">
-    <h2>1. ¿Cómo te sientes hoy?</h2>
+    <h2>1. ¿Cómo te sientes hoy? (elige las que quieras)</h2>
     <div class="moods" id="moods"></div>
     <div class="moodmsg" id="moodmsg"></div>
     <div class="range" id="range">
@@ -96,6 +106,20 @@ textarea:focus{outline:none;border-color:var(--pink)}
     <div id="joke"><div class="q" id="jq"></div><div class="a" id="ja"></div><div class="jr"><button id="jl">😂 Me dio risa</button><button id="jm">🙄 Qué malo</button><button id="jn">Otro 🎲</button></div></div>
   </section>
 
+  <section class="card" id="stories">
+    <h2>5. Escoge el cuento de la noche 🌙</h2>
+    <div class="chips" id="stypes"></div>
+    <div class="jr" style="margin-top:14px"><button class="jbtn" id="srand">Sorpréndeme 🎲</button></div>
+    <div class="slist" id="slist"></div>
+    <div id="reader">
+      <h3 id="stitle"></h3>
+      <div class="jr"><button id="ssm">A-</button><button id="sbig">A+</button><button id="snight">🌙 Modo noche</button><button id="sspeak">🔊 Escuchar</button></div>
+      <div id="stext"></div>
+      <div style="text-align:center;margin-top:16px"><button class="jbtn" id="sfin">Ya me dormí 😴</button></div>
+      <div id="sdone">Dulces sueños, pototito 💤🌙<br><span style="font-weight:700;font-size:.85rem;color:var(--soft)">Tu cuento va en el mensaje para tu amor 💌</span></div>
+    </div>
+  </section>
+
   <a id="send" class="dis" href="#" target="_blank" rel="noopener">Enviarle mi corazón por WhatsApp 💚</a>
   <div class="hint" id="hint">Elige cómo te sientes para continuar</div>
 
@@ -111,18 +135,19 @@ var HIS_NAME = "";            // Tu nombre (opcional)
 // ============================
 var MOODS=[["😊","Feliz"],["🥰","Enamorada"],["😴","Cansada"],["😢","Triste"],["😤","Molesta"],["😰","Ansiosa"],["🥺","Sensible"],["😶","Sin ganas"],["🤒","Mal del cuerpo"]];
 var NEEDS=[["🤗","Un abrazo"],["📞","Que me llames"],["🍫","Un antojo"],["👂","Que me escuches"],["🎬","Plan de película"],["🌹","Un detalle"],["🫶","Mimos"],["🤫","Espacio y silencio"],["🍕","Comida rica"],["🚶","Salir a pasear"],["😂","Que me hagas reír"],["💬","Palabras bonitas"]];
-var mood=null,needs=[];
+var mood=null,moods=[],needs=[];
 var $=function(i){return document.getElementById(i)};
 $("title").textContent="Hola, "+NICK+" 💖";
-MOODS.forEach(function(m){var b=document.createElement("button");b.className="mood";b.innerHTML="<b>"+m[0]+"</b>"+m[1];b.onclick=function(){document.querySelectorAll(".mood").forEach(function(x){x.classList.remove("on")});b.classList.add("on");mood=m;$("range").classList.add("show");burst(b,m[0]);setTheme(m[1]);upd()};$("moods").appendChild(b)});
+MOODS.forEach(function(m){var b=document.createElement("button");b.className="mood";b.innerHTML="<b>"+m[0]+"</b>"+m[1];b.onclick=function(){var i=moods.indexOf(m);if(i<0){moods.push(m);b.classList.add("on");burst(b,m[0])}else{moods.splice(i,1);b.classList.remove("on")}mood=moods.length?moods[moods.length-1]:null;$("range").classList.toggle("show",!!mood);setTheme(mood?mood[1]:"");upd()};$("moods").appendChild(b)});
 NEEDS.forEach(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n[0]+" "+n[1];b.onclick=function(){var i=needs.indexOf(n);if(i<0){needs.push(n);b.classList.add("on");burst(b,n[0])}else{needs.splice(i,1);b.classList.remove("on")}upd()};$("needs").appendChild(b)});
 $("level").oninput=function(){$("rv").textContent=this.value+" / 10 "+bar(this.value)};
 function upd(){var ok=!!mood;refresh();$("hint").textContent=ok?(needs.length?"¡Perfecto! Ya puedes enviarlo 💕":"Ahora elige qué necesitas (o escríbelo abajo)"):"Elige cómo te sientes para continuar"}
 function burst(el,e){var r=el.getBoundingClientRect();for(var i=0;i<8;i++){var h=document.createElement("div");h.className="heart";h.textContent=i%2?e:"💗";h.style.left=(r.left+r.width/2)+"px";h.style.top=(r.top+r.height/2)+"px";h.style.setProperty("--x",(Math.random()*160-80)+"px");h.style.setProperty("--y",(-Math.random()*130-20)+"px");document.body.appendChild(h);setTimeout(function(x){x.remove()},1000,h)}}
 function buildMsg(){
-  var t="💌 *ALERTA DE AMOR* 💌\n"+(HER_NAME?HER_NAME+" te escribe:\n":"")+"\n*Me siento:* "+mood[0]+" "+mood[1]+" ("+$("level").value+"/10) "+bar($("level").value)+"\n";
+  var t="💌 *ALERTA DE AMOR* 💌\n"+(HER_NAME?HER_NAME+" te escribe:\n":"")+"\n*Me siento:* "+moods.map(function(x){return x[0]+" "+x[1]}).join(" + ")+" ("+$("level").value+"/10) "+bar($("level").value)+"\n";
   t+="*Necesito:* "+(needs.length?needs.map(function(n){return n[0]+" "+n[1]}).join(", "):"—")+"\n";
   var note=$("note").value.trim();if(note)t+="\n*Te quiero decir:* "+note+" "+detFlat(note).join("")+"\n";
+  if(window.curStory)t+="\n🌙 Cuento de la noche: "+curStory.t+"\n";
   if(jokesSeen)t+="\n😂 Chistes: "+jokesSeen+" | Me dieron risa: "+laughs+"\n";
   t+="\nTe quiero 💖";
   return t;
@@ -142,9 +167,9 @@ $("cp").onclick=function(){var t=buildMsg(),b=this;function ok(){b.textContent="
 $("note").addEventListener("input",function(){refresh();showDet()});$("level").addEventListener("input",refresh);
 var TH={"Feliz":["😊","🌞","🎉","💛","✨","🌈"],"Enamorada":["💖","💘","😍","🌹","💕","🦋"],"Cansada":["😴","🌙","💤","☁️","🛏️","🫂"],"Triste":["🌧️","💧","🤍","🫂","🥺","🌈"],"Molesta":["🔥","😤","💢","🌋","⚡","🫂"],"Ansiosa":["🍃","🫁","🌊","💙","🕊️","🌸"],"Sensible":["🥺","🫂","🌷","💗","🤍","🧸"],"Sin ganas":["🛋️","🍿","☁️","🐌","💤","🧸"],"Mal del cuerpo":["🤒","🍵","💊","🫂","❤️‍🩹","🍲"]};
 var MM={"Feliz":"¡Qué bonito! Tu felicidad me contagia 🎉","Enamorada":"Yo también estoy enamorado de ti 💘","Cansada":"Descansa, mi amor, te lo mereces 😴","Triste":"Aquí estoy contigo, no estás sola 🫂","Molesta":"Respira, cuéntame todo, te escucho 🔥➡️💙","Ansiosa":"Respira conmigo: todo va a estar bien 🍃","Sensible":"Te voy a llenar de mimos 🧸","Sin ganas":"Pues manta, peli y abrazo, ¿qué dices? 🍿","Mal del cuerpo":"Pobrecita, ya mismo te cuido 🍵"};
-function bar(n){return mood?new Array(Math.ceil(n/3)+1).join(mood[0]):""}
-function setTheme(k){var f=$("floaty"),s=TH[k]||["💖"];f.innerHTML="";for(var i=0;i<24;i++){var e=document.createElement("span");e.textContent=s[i%s.length];e.style.left=Math.random()*100+"%";e.style.fontSize=(16+Math.random()*26)+"px";e.style.animationDuration=(7+Math.random()*9)+"s";e.style.animationDelay=(-Math.random()*12)+"s";f.appendChild(e)}
-  $("moodmsg").textContent=MM[k]||"";$("level").oninput()}
+function bar(n){var r=Math.ceil(n/5);return moods.map(function(x){return new Array(r+1).join(x[0])}).join("")}
+function setTheme(k){var f=$("floaty"),s=[];moods.forEach(function(x){s=s.concat(TH[x[1]]||[])});if(!s.length)s=["💖","💗","✨","🌸","💕","🦋"];f.innerHTML="";for(var i=0;i<24;i++){var e=document.createElement("span");e.textContent=s[i%s.length];e.style.left=Math.random()*100+"%";e.style.fontSize=(16+Math.random()*26)+"px";e.style.animationDuration=(7+Math.random()*9)+"s";e.style.animationDelay=(-Math.random()*12)+"s";f.appendChild(e)}
+  $("moodmsg").textContent=moods.length>1?"¡Cuántas cosas sientes a la vez! Aquí estoy para todas 🫂💖":(MM[k]||"");$("level").oninput()}
 var KW=[[/te quiero|te amo|amor|carino/,["❤️","💞"]],[/triste|llor|mal el dia/,["😢","💔"]],[/cansad|sueno|dormir|siesta/,["😴","🌙"]],[/hambre|comer|comida|almuerzo|cena/,["🍔","😋"]],[/pizza/,["🍕"]],[/helado/,["🍦"]],[/dulce|chocolate|postre/,["🍫","🍰"]],[/abraz/,["🤗","🫂"]],[/beso/,["😘","💋"]],[/extran|falta/,["🥺","💭"]],[/rabia|molest|bravo|enojad/,["😤","🔥"]],[/feliz|content|alegre/,["😊","🎉"]],[/pelicula|serie|netflix|cine/,["🎬","🍿"]],[/llama|llamada|hablar/,["📞"]],[/salir|pasear|caminar|parque/,["🚶‍♀️","🌳"]],[/flores|detalle|regalo|sorpresa/,["🌹","🎁"]],[/enferm|dolor|gripa|fiebre/,["🤒","💊"]],[/miedo|ansios|nerv|estres/,["😰","🍃"]],[/gracias/,["🙏","💕"]],[/mimos|consent/,["🫂","🧸"]],[/cafe/,["☕"]],[/playa|mar |vacaciones/,["🏖️"]],[/musica|cantar|bailar/,["🎶"]],[/ayuda|ayudame/,["🆘","🫂"]],[/lindo|lind|bonit|hermos/,["🌸","✨"]],[/risa|chiste|gracios/,["😂"]],[/compras|ropa|vestido/,["🛍️","👗"]],[/estudi|trabajo|tarea/,["📚","💪"]]];
 function detFlat(s){s=s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");var o=[];KW.forEach(function(k){if(k[0].test(s))k[1].forEach(function(e){if(o.indexOf(e)<0)o.push(e)})});return o}
 var lastDet="";
@@ -195,6 +220,754 @@ function nextJoke(){var j=pick();jokesSeen++;$('jq').textContent=j[0];$('ja').te
 $("jb").onclick=nextJoke;$("jn").onclick=nextJoke;
 $("jl").onclick=function(){laughs++;burst(this,"😂")};
 $("jm").onclick=function(){burst(this,"🙄")};
+var STORIES=[
+{t:'Pototito y el Jardín de los Sueños',k:'princesa',x:`En el reino de las Mil Flores vivía un príncipe llamado Pototito, que en realidad no quería ser príncipe de nada. Lo que él quería era ser jardinero. Todas las mañanas, antes de que su padre el rey despertara, Pototito se escapaba con su regadera de plata y cuidaba un rincón olvidado del palacio, donde solo crecían hierbas secas y piedras grises.
+
+—Ahí no va a crecer nada, alteza —le decían los sirvientes.
+
+—Todo crece si le das cariño —contestaba él.
+
+Un día, mientras regaba, escuchó un llanto muy suave que salía de debajo de una piedra. Levantó la roca con cuidado y encontró una semilla diminuta, brillante como una gota de luz, que temblaba.
+
+—Por favor, no me dejes sola —dijo la semilla—. Soy la última Semilla de los Sueños. Si me plantas en tierra con amor, creceré y de mis flores nacerán los mejores sueños del mundo. Pero necesito tres cosas: agua de luna, abrazo de sol y una canción de corazón.
+
+Pototito abrazó la semilla y prometió ayudarla.
+
+Esa misma noche, salió al balcón con un cuenco de cristal y esperó a que la luna estuviera en lo alto. Pero la luna estaba triste y se escondía tras las nubes.
+
+—¿Por qué te escondes, luna? —preguntó.
+
+—Porque nadie me mira —respondió ella—. Todos duermen y yo me siento sola.
+
+Pototito se sentó a conversar con la luna hasta la madrugada. Le contó de su jardín, de sus miedos, de sus ganas de ser feliz. La luna lloró de emoción, y sus lágrimas cayeron en el cuenco convertidas en agua plateada. Ya tenía el agua de luna.
+
+Al amanecer, subió a la colina más alta, pero el sol estaba de mal humor y quemaba todo lo que tocaba.
+
+—¡Aléjate, pequeño! ¡Estoy furioso con el mundo!
+
+Pototito no se alejó. Se quedó quieto, respiró hondo y le dijo:
+
+—Todos nos enojamos a veces. Yo no quiero que te vayas, solo quiero un abrazo tuyo muy suavecito.
+
+El sol se quedó pensando. Nadie se le había acercado jamás sin miedo. Poco a poco bajó sus rayos, los volvió tibios, y envolvió a la semilla en un calor tan dulce que casi se queda dormida. Ya tenía el abrazo del sol.
+
+Solo faltaba la canción de corazón. Pototito se sentó junto a la tierra del rincón olvidado, plantó la semilla y trató de cantar, pero se dio cuenta de que no sabía ninguna canción. Se puso nervioso.
+
+—No sé cantar, semilla. Lo siento.
+
+—No importa —dijo ella—. Una canción de corazón no necesita ser perfecta. Solo necesita ser sincera.
+
+Entonces Pototito cerró los ojos y empezó a tararear algo que nacía desde adentro, sin palabras, con todo el cariño que sentía por su jardín. La tierra tembló suavemente, y de ella brotó un tallo verde, luego unas hojas, y por último una flor enorme de pétalos azules y dorados que olía a galletas con leche.
+
+Cuando el rey despertó, encontró a todo el palacio sonriendo. De la flor flotaban burbujitas de colores, y dentro de cada una había un sueño: volar sobre el mar, hablar con los delfines, bailar en un campo de luciérnagas.
+
+—¿Esto lo hiciste tú, hijo? —preguntó el rey, con los ojos brillantes.
+
+—Solo le di cariño —respondió Pototito.
+
+Desde ese día, el rey nombró a Pototito Príncipe Jardinero, y el rincón olvidado se convirtió en el Jardín de los Sueños, donde todas las noches florecen sueños nuevos para quienes se van a dormir.
+
+Y si esta noche sueñas con flores, ya sabes quién las sembró. 🌷`},
+{t:'Pototito, Pototita y el Bosque de los Árboles que Hablan',k:'aventura',x:`Cerca de la casa de Pototito y Pototita había un bosque del que se contaban historias extrañas. Decían que los árboles hablaban, pero solo con quienes sabían escuchar. Una tarde de otoño, con las hojas cayendo como lluvia dorada, los dos amigos decidieron comprobarlo.
+
+Entraron al bosque con una linterna y un cuaderno. Al principio solo oían el viento y los pájaros. Pero cuando se sentaron en silencio, apoyados en un tronco, escucharon una voz profunda que venía de las ramas:
+
+—Por fin alguien que escucha...
+
+Pototita dio un salto, y Pototito casi se cae de espaldas.
+
+—¿Usted habló? —preguntó él.
+
+—Soy el Abeto Ligero —dijo el árbol—. Hace mucho tiempo que nadie viene a visitarnos. Y tenemos un problema: el Árbol Anciano, el más viejo del bosque, ha olvidado su historia. Sin ella, se está marchitando.
+
+—¿Y cómo podemos ayudarlo? —preguntó Pototita.
+
+—Recogiendo los recuerdos que cada árbol guarda de él. Cada uno sabe un pedacito. Si los reunimos todos, el Anciano recordará.
+
+Así empezó una búsqueda. El primer recuerdo lo tenía un sauce llorón, que contó que el Anciano había sido una semilla diminuta, llevada por un pajarito desde muy lejos. El segundo lo dio un pino alto: el Anciano había crecido solo, pero cada primavera lo visitaban mariposas que le susurraban cuentos. El tercero lo dio un cerezo sonrojado: había protegido del frío a cien generaciones de ardillas.
+
+Pototito y Pototita lo anotaban todo en el cuaderno, caminando de árbol en árbol, mientras caía la noche y las luciérnagas encendían sus lucecitas. Escucharon historias de tormentas, de nidos, de amores bajo las ramas, de niños que trepaban por los troncos.
+
+Cuando reunieron todos los recuerdos, llegaron al claro donde dormía el Árbol Anciano. Era inmenso, con un tronco tan ancho que habría hecho falta diez personas para abrazarlo. Sus hojas estaban pálidas y caídas.
+
+Pototita se aclaró la voz y empezó a leer, despacito, con cariño:
+
+—Había una vez una semilla pequeñita que llegó volando desde muy lejos...
+
+A medida que leía, las hojas del Anciano fueron recobrando color. Pototito también leyó su parte. Y cuando terminaron, el árbol suspiró con una voz tan grave que hizo temblar el suelo:
+
+—Ahora recuerdo. Gracias, pequeños. Mi historia es la historia de todos los que me quisieron.
+
+Sus ramas se llenaron de brotes verdes, y el bosque entero crujió de alegría. Los dos amigos se quedaron dormidos al pie del Anciano, arropados por una lluvia suave de hojas doradas.
+
+Y mientras dormían, todos los árboles del bosque les cantaron una nana muy antigua, de esas que solo se escuchan una vez en la vida. 🍂`},
+{t:'Pototita y el Faro Apagado',k:'drama',x:`Había una vez un faro en lo alto de un acantilado, que durante cien años había guiado a los barcos en las noches de tormenta. Pero una noche de truenos, su luz se apagó de repente y no volvió a encenderse. Los pescadores se asustaron. Sin faro, el mar se volvía peligroso, y el guardián, un anciano llamado don Remigio, se enfermó de tristeza al ver su querido faro a oscuras.
+
+Su nieta Pototita, una niña de diez años, tenía el corazón roto al ver a su abuelo tan callado.
+
+—Abuelito, ¿por qué no arreglas el faro? —le preguntó una tarde.
+
+—Ya no puedo, mi cielo —suspiró él—. El mecanismo es muy viejo y yo también. Ya no tengo fuerzas.
+
+Pototita lo abrazó fuerte y no dijo nada, pero esa noche tomó una decisión. Le pidió ayuda a Pototito, su mejor amigo, que sabía mucho de herramientas porque su papá era herrero.
+
+—¿Estás segura de que podemos? —preguntó Pototito, nervioso.
+
+—No —respondió ella—. Pero tenemos que intentarlo.
+
+Subieron las ciento veinte escaleras del faro con una linterna. Arriba encontraron la gran lente cubierta de polvo y un engranaje oxidado que no giraba. Trabajaron toda la noche limpiando, engrasando, probando. Se mancharon las manos, se cansaron, y varias veces estuvieron a punto de rendirse.
+
+—No va a funcionar —dijo Pototito, con los hombros caídos.
+
+Pototita lo miró con los ojos brillantes de cansancio.
+
+—Mi abuelo dice que las cosas difíciles no se arreglan de un golpe, sino poquito a poco. Un poquito más, Pototito. Solo un poquito más.
+
+Al tercer día descubrieron el problema: faltaba una pequeña pieza de cobre, del tamaño de una moneda. Pototito corrió a la herrería de su padre, quien, sin hacer preguntas, forjó una nueva con sus propias manos.
+
+Anocheció. El mar rugía y empezó a caer una lluvia fuerte. Pototita colocó la pieza con las manos temblorosas, giró la manivela y... nada. El silencio fue enorme.
+
+—Perdimos —murmuró Pototito.
+
+Pero justo entonces, tras un crujido largo y profundo, el engranaje comenzó a girar. Un chispazo. Otro más. Y de pronto, un haz de luz blanca atravesó la tormenta y se extendió sobre el mar como un abrazo enorme.
+
+Abajo, en el pueblo, todos salieron a mirar. Los pescadores vieron la luz y supieron que estaban a salvo. Don Remigio, desde su cama, vio el resplandor en la ventana y se incorporó con lágrimas en los ojos.
+
+—El faro... —susurró—. Está encendido.
+
+Subió despacito las escaleras, apoyado en su bastón, y encontró a los dos niños dormidos junto a la lente, sucios, exhaustos y felices. Los cubrió con su abrigo y se sentó a vigilar la luz toda la noche, como no hacía desde hacía mucho tiempo.
+
+Al día siguiente, el pueblo entero fue a agradecerles. Pero Pototita solo dijo:
+
+—Mi abuelo siempre dice que el faro no pertenece a una persona, sino a todos los que lo necesitan. Solo hicimos lo que correspondía.
+
+Desde entonces, don Remigio recuperó las fuerzas poco a poco, y Pototita y Pototito se convirtieron en los guardianes jóvenes del faro, aprendiendo cada noche el arte de mantener una luz encendida.
+
+Porque cuando alguien que quieres está en la oscuridad, a veces lo más valiente que puedes hacer es convertirte en su luz. 💡`},
+{t:'Pototita y el Pájaro que no Sabía Volar',k:'drama',x:`En el jardín de Pototita, una mañana de primavera, apareció un pajarito en el suelo, con un ala doblada y los ojitos asustados. Pototita se agachó con mucho cuidado y lo tomó entre sus manos.
+
+—Tranquilo, pequeño —susurró—. Yo te voy a cuidar.
+
+Lo llevó adentro, preparó una cajita con algodón y llamó a su amigo Pototito, que sabía mucho de animales.
+
+—Tiene el ala lastimada —dijo él, examinándolo—. Con reposo y paciencia se curará, pero tardará un tiempo.
+
+Pototita lo llamó Gorrión Chiquito, y durante semanas lo alimentó con migas y gotitas de agua. El pajarito se encariñó con ella: se le posaba en el hombro, le piaba al oído y la seguía por toda la casa saltando.
+
+Cuando el ala sanó, llegó el momento de dejarlo volar. Pototita lo llevó al jardín, lo levantó en la palma de la mano y esperó. Pero Gorrión Chiquito no se movió. Miraba el cielo con ojos asustados.
+
+—Vamos, pequeño —animó ella—. Tú puedes.
+
+El pajarito dio un saltito, abrió las alas, y las cerró de inmediato. Temía caerse otra vez. Repitió el intento cinco veces, y las cinco se echó atrás.
+
+Pototita sintió una tristeza enorme. ¿Y si nunca volaba? ¿Y si tenía que quedarse siempre con ella, atrapado por el miedo?
+
+Aquella noche, Pototito la encontró llorando en el jardín.
+
+—No es que no pueda —le dijo con suavidad—. Es que tiene miedo. Y el miedo no se quita empujando, sino acompañando.
+
+Así que empezaron a practicar poquito a poco. Primero, sobre una rama baja. Luego, sobre una mesa. Después, desde el tejado de la caseta. Cada día, Gorrión Chiquito se atrevía a un poquito más. Pototita y Pototito lo aplaudían cada vez, sin importar cuán pequeño fuera el vuelo.
+
+Una mañana de sol, el pajarito subió a la rama más alta del manzano. Miró hacia abajo, luego al cielo, luego a Pototita. Ella le sonrió con los ojos llenos de lágrimas.
+
+—Ve, Gorrión. Ya es hora.
+
+El pajarito abrió las alas, cerró los ojos y se lanzó. Cayó un poquito... pero de repente, el viento lo sostuvo, y empezó a subir, a subir, a subir. Dio una vuelta alrededor del jardín y luego se perdió entre las nubes, pitando de pura felicidad.
+
+Pototita se quedó mirando el cielo, con el corazón a punto de romperse y de hincharse a la vez. Pototito le tomó la mano.
+
+—Lo lograste.
+
+—No —respondió ella, llorando y riendo—. Lo logró él.
+
+Esa noche, Pototita no pudo dormir pensando en su pajarito. Pero a la mañana siguiente, al abrir la ventana, encontró en el alféizar una plumita azul. Y desde entonces, cada primavera, un gorrión pequeño volvía al manzano a cantarle una canción.
+
+Porque querer es dejar volar. Y quienes se quieren siempre regresan. 💙`},
+{t:'La Noche más Larga del Invierno',k:'amor',x:`Pototito y Pototita vivían en una cabaña de madera en el borde de un bosque nevado, y llevaban tantos años juntos que ya no recordaban cómo era la vida antes de conocerse. Cada día tenía su rutina: ella preparaba el desayuno, él cortaba leña; ella pintaba, él leía en voz alta; y al caer la tarde se sentaban frente a la chimenea con dos tazas de chocolate caliente.
+
+Pero esa noche era especial. Era la noche más larga del invierno, la que, según la leyenda del bosque, tiene más oscuridad y más estrellas que ninguna. Se decía que quien pidiera un deseo bajo el cielo de esa noche, lo vería cumplido.
+
+—¿Salimos a mirar las estrellas? —propuso Pototita, con los ojos encendidos de ilusión.
+
+—Hace muchísimo frío —dijo Pototito, y luego sonrió—. Pero contigo, hasta el frío se vuelve bonito.
+
+Se abrigaron con mantas, bufandas y gorros, llenaron un termo de chocolate y salieron al claro del bosque. La nieve crujía bajo sus botas, y el cielo, sin una sola nube, parecía un manto negro cubierto de diamantes.
+
+Se acostaron sobre una manta extendida en la nieve, uno al lado del otro, mirando hacia arriba. Durante un rato largo no dijeron nada. Solo respiraban despacio, viendo cómo su aliento se convertía en nubecitas blancas.
+
+—¿Sabes qué voy a desear? —preguntó Pototita en voz baja.
+
+—No me lo digas —respondió él—. Si lo dices, quizá no se cumpla.
+
+—Es que no es un deseo para mí. Es para ti.
+
+Pototito giró la cabeza y la miró. A la luz de las estrellas, ella parecía hecha de luz.
+
+—Yo ya tengo todo lo que deseo —dijo él—. Te tengo a ti.
+
+Hubo un silencio muy dulce. Entonces pasó una estrella fugaz, larga y brillante, y los dos cerraron los ojos a la vez. Cuando los abrieron, se miraron y se echaron a reír, porque sabían que habían pedido exactamente lo mismo: poder pasar muchas noches más así, juntos, mirando el cielo.
+
+Se quedaron allí hasta que el frío les entumió los dedos. Volvieron a la cabaña de la mano, encendieron la chimenea y se acurrucaron bajo una manta enorme, con los pies helados y el corazón calentito.
+
+—¿Sabes? —murmuró Pototita, medio dormida—. Creo que la noche más larga del invierno es mi favorita.
+
+—¿Por qué? —preguntó él, abrazándola.
+
+—Porque dura más tiempo para quererte.
+
+Pototito la apretó suavemente y le dio un beso en la frente. Afuera, la nieve seguía cayendo despacito. Adentro, el fuego crepitaba con un sonido tan tranquilo que parecía una canción de cuna.
+
+Y así, abrazados, se quedaron dormidos, soñando el mismo sueño: un sueño de estrellas, de chocolate caliente y de todos los inviernos que aún les quedaban por vivir juntos.
+
+Buenas noches, mi amor. Que sueñes bonito. 🌙💖`},
+{t:'El Tren Nocturno a la Luna',k:'amor',x:`Pototito y Pototita tenían una tradición: la noche de su aniversario, tomaban el Tren Nocturno, un tren pequeño y brillante que solo salía cuando el cielo estaba despejado. No tenía un destino fijo, porque llevaba a los pasajeros al lugar donde su corazón quería ir.
+
+Esa noche, se subieron con una canasta de bocadillos y una manta a cuadros. El revisor, un conejo con sombrero de copa, les picó los boletos con una sonrisa.
+
+—¿Adónde, queridos viajeros?
+
+—A donde nos lleve el amor —respondió Pototita.
+
+El tren arrancó con un silbido suave, y empezó a subir por las vías de luz que se extendían entre las nubes. Por la ventana, el mundo se hacía pequeñito.
+
+La primera parada fue una estación de linternas de papel, donde estaba suspendido el recuerdo de la primera vez que se vieron. En una cafetería, hacía años, ella se había tropezado con él y le había derramado el chocolate caliente en la camisa. Se rieron al verlo de nuevo, como en una película.
+
+La segunda parada era un andén lleno de globos, donde flotaba el recuerdo del día que se prometieron cuidarse siempre. Pototito le apretó la mano, y ella apoyó la cabeza en su hombro.
+
+La tercera parada fue una estación de flores, donde brillaba el recuerdo de un día difícil, cuando ella estuvo triste y él se quedó a su lado sin decir nada, solo acompañando. Pototita sintió un nudo en la garganta y le susurró: «Gracias por esos días». Él la abrazó con ternura.
+
+El tren siguió subiendo, y las estrellas se hicieron enormes, tan cerca que parecían estar al alcance de la mano. Y de pronto, el revisor anunció:
+
+—¡Última parada: la Luna!
+
+Bajaron en un paisaje plateado y silencioso, lleno de polvo de estrellas que brillaba bajo sus pies. A lo lejos, una orquesta de grillos lunares tocaba una melodía lenta y dulce.
+
+—¿Bailamos? —preguntó Pototito, extendiendo la mano.
+
+Bailaron despacito, descalzos sobre la luna, sin prisa y sin palabras. Cada paso levantaba una nube de brillantina. Pototita cerró los ojos y pensó que, si pudiera elegir un lugar para quedarse a vivir, sería ese: entre sus brazos.
+
+Cuando los grillos terminaron la canción, se sentaron sobre una roca blanca, envueltos en la manta, a ver cómo la Tierra giraba lentamente, azul y brillante.
+
+—Mira qué bonita se ve desde aquí —dijo ella.
+
+—Sí —respondió él, mirándola solo a ella—. Pero lo más bonito del universo está sentado a mi lado.
+
+Pototita se sonrojó y apoyó la cabeza en su pecho. Poco a poco, el sueño los fue venciendo, y se quedaron dormidos bajo un cielo lleno de estrellas.
+
+El conejo revisor los cubrió con una segunda manta y, antes de irse, susurró:
+
+—Buenas noches, queridos. Mañana los llevo de vuelta a casa.
+
+Y el tren los esperó toda la noche, quietecito, silbando bajito para no despertarlos. 🌙💖`},
+{t:'Pototita y el Castillo de las Nubes',k:'princesa',x:`Había una vez, en un reino tan alto que las nubes servían de alfombra, una princesa llamada Pototita. Su castillo era de un blanco brillante, con torres redondas como bolitas de algodón y ventanas que se abrían hacia el cielo. Pero Pototita no era una princesa como las demás: no le gustaban los vestidos pesados ni las coronas que dan dolor de cabeza. Lo que más le gustaba era mirar las estrellas desde la torre más alta y contarles sus secretos.
+
+Una noche, mientras susurraba sus deseos al cielo, vio caer una estrella pequeñita, que bajó dando vueltas hasta aterrizar en su balcón. La estrella parpadeaba débilmente, como si tuviera sueño y frío a la vez.
+
+—¡Ay, pobrecita! —dijo Pototita, tomándola con cuidado entre sus manos—. ¿Qué te pasó?
+
+—Me perdí —respondió la estrella con una vocecita de campanita—. Me solté de mi constelación y ya no sé cómo volver. Si no regreso antes del amanecer, mi luz se apagará para siempre.
+
+Pototita no lo pensó dos veces. Se puso su capa azul, guardó a la estrellita en el bolsillo y salió corriendo del castillo.
+
+En el primer puente de nubes encontró a un guardián gigante y gruñón que cuidaba el camino.
+
+—Nadie pasa sin responder mi acertijo —rugió—. ¿Qué cosa crece cuando la compartes?
+
+Pototita sonrió y pensó en todas las cosas bonitas que había vivido.
+
+—¡La alegría! —contestó.
+
+El gigante se quedó callado un momento y luego se le escapó una sonrisa tímida.
+
+—Nadie me había respondido con tanto cariño. Pasa, princesa.
+
+Siguió caminando y llegó a un valle donde soplaba el Viento Travieso, que revolvía todo a su paso. Le quitó la capa, le despeinó el cabello y casi se lleva a la estrellita. Pototita se agachó, protegió su bolsillo con las dos manos y le habló con dulzura:
+
+—Viento, no quiero pelear contigo. Solo necesito ayuda. ¿Podrías llevarnos hasta la Constelación del Cisne?
+
+El viento, que nunca había recibido un «por favor», se calmó de inmediato.
+
+—Sube a mi lomo, princesa —dijo, y se hizo suave como una brisa de primavera.
+
+Volaron entre nubes rosadas y lunas dormidas, y al fin vieron la constelación del Cisne, con un hueco en el lugar donde faltaba una estrella. Pero entre la princesa y la constelación se extendía un río de niebla espesa, donde reinaba la Bruja del Bostezo, que dormía a todos los que se acercaban.
+
+Pototita sintió que los párpados se le cerraban, pero recordó algo que le decía siempre su abuela: «Cuando el sueño sea muy fuerte, canta bajito». Entonces cantó una canción de cuna, una muy suave, y la melodía llegó hasta la bruja, que se quedó escuchando con los ojos llenos de lágrimas.
+
+—Hace mil años que nadie me canta —susurró—. Siempre me temen. Gracias, princesa. Pasen, pasen.
+
+La niebla se abrió como una cortina. Pototita sacó a la estrellita y la lanzó con ternura hacia el hueco del Cisne. ¡Clic! La estrella encajó en su lugar y todo el cielo brilló más que nunca.
+
+—Gracias, Pototita —dijo la estrella—. Mereces un deseo.
+
+La princesa lo pensó mucho. Podría haber pedido joyas, reinos o castillos. Pero pidió algo sencillo:
+
+—Deseo que todos los que miren el cielo esta noche duerman tranquilos y sueñen cosas hermosas.
+
+Y así fue. Desde entonces, cada vez que alguien mira las estrellas antes de dormir, siente una calma muy dulce, como si una princesa de las nubes lo estuviera arropando.
+
+Pototita volvió a su castillo justo cuando salía el sol, se metió en su cama de plumas y se quedó dormida con una sonrisa.
+
+Y tú también, ya puedes cerrar los ojitos... ✨`},
+{t:'Pototito, Pototita y la Isla del Tesoro Dormilón',k:'aventura',x:`Pototito y Pototita eran dos grandes amigos exploradores que tenían un barco pequeñito de velas amarillas llamado La Galleta. Un día, mientras limpiaban el desván de la abuela de Pototita, encontraron un mapa viejo, enrollado dentro de una botella.
+
+—Mira, Pototito —dijo ella, señalando una equis roja—. «Tesoro Dormilón. Solo se encuentra con la luna llena.»
+
+—¡Una aventura! —gritó Pototito—. ¡Preparemos el barco!
+
+Llenaron la despensa de galletas, mermelada y limonada, y zarparon esa misma tarde. Navegaron durante tres días y tres noches, guiándose por las estrellas, hasta que divisaron una isla con forma de ballena dormida. Tenía una montaña redonda que subía y bajaba lentamente, como si respirara.
+
+—Esta isla está viva —susurró Pototita.
+
+—Pues vamos con mucho cuidado —respondió Pototito—. No queremos despertarla.
+
+Desembarcaron en puntitas de pie. La arena era tibia y suave, y por todas partes crecían palmeras que cantaban bajito mientras se mecían. Siguiendo el mapa, entraron en una selva de helechos gigantes donde vivían unos monitos con gorros de dormir, que bostezaban sin parar.
+
+—Shhh —dijo un mono, llevándose un dedo a los labios—. Aquí todos duermen. Si hacen ruido, la isla despertará y se sumergirá otra vez en el océano.
+
+Pototito y Pototita asintieron y siguieron avanzando sin hacer ni un ruidito. Cruzaron un puente de lianas que crujía a cada paso, y con cada crujido contenían la respiración. Después atravesaron una cueva donde dormían murciélagos acurrucados como bolitas de terciopelo.
+
+Al fondo de la cueva había una puerta enorme de madera, con un candado en forma de luna. Pototita sacó el mapa y lo puso frente a la cerradura.
+
+—Dice que se abre con luz de luna llena —leyó.
+
+Salieron corriendo hacia un claro de la selva, justo cuando la luna aparecía enorme y plateada en el cielo. Con un espejito que llevaba en el bolsillo, Pototita reflejó la luz hasta la cerradura. ¡Clac! El candado se abrió.
+
+Dentro de la cueva no había monedas de oro, ni diamantes, ni coronas. En el centro de una sala redonda había un enorme almohadón de plumas, y sobre él una carta que decía:
+
+«El mayor tesoro es descansar sabiendo que no estás solo. Este almohadón guarda los mejores sueños de todos los exploradores que lo han encontrado. Acuéstense, valientes, y sueñen.»
+
+Pototito y Pototita se miraron y se echaron a reír bajito.
+
+—Pues yo estoy muy cansado —confesó Pototito.
+
+—Y yo también —bostezó Pototita.
+
+Se recostaron sobre el almohadón, que era la cosa más suave del mundo, y se quedaron dormidos al instante. Soñaron con delfines que cantaban, con montañas de helado, con un barco que volaba entre las nubes. Y mientras dormían, la isla-ballena respiraba muy despacito, meciéndolos como una cuna gigante.
+
+Al amanecer, regresaron a La Galleta con el corazón lleno y la cabeza llena de sueños. Nunca se lo contaron a nadie, porque algunos tesoros se guardan mejor en silencio.
+
+Y desde entonces, cada vez que sientes un sueño muy dulce, quizás es porque Pototito y Pototita te han prestado su almohadón. 🌙`},
+{t:'Pototita y el Dragón que tenía Frío',k:'aventura',x:`En lo alto de la Montaña Nevada vivía un dragón enorme, de escamas rojas y ojos dorados, del que todos los pueblos cercanos tenían un miedo terrible. Se decía que lanzaba llamaradas y que se comía a los viajeros. Nadie se atrevía a subir.
+
+Nadie, excepto Pototita.
+
+Pototita era pequeña, valiente y muy curiosa. Una mañana de invierno notó algo raro: hacía muchísimo más frío de lo normal en el pueblo, y las chimeneas del dragón, que siempre humeaban, estaban apagadas.
+
+—Algo le pasa a ese dragón —dijo—. Voy a averiguarlo.
+
+Su mamá le tejió una bufanda enorme, su amigo Pototito le prestó unas botas de nieve y le dio un termo con chocolate caliente.
+
+—Cuídate mucho —le pidió Pototito, preocupado—. Yo te espero aquí con una sopa.
+
+Pototita subió la montaña durante horas. El viento helado le mordía las mejillas, la nieve le llegaba hasta las rodillas, y a lo lejos oía un sonido extraño, como un sollozo. Cuando por fin llegó a la cueva del dragón, se encontró con algo inesperado: el gran dragón estaba hecho un ovillo, temblando, con los dientes castañeteando.
+
+—¡Vete! —gruñó con voz débil—. ¡No te acerques o te quemaré!
+
+—No creo que puedas —dijo Pototita con calma—. Estás tan frío que ni una chispa te sale.
+
+El dragón abrió un ojo, sorprendido. Era verdad: cuando intentó soplar fuego, solo salió un hilito de humo gris.
+
+—Se me apagó el fuego —confesó, y una lágrima congelada rodó por su mejilla—. Llevaba siglos protegiendo mi cueva, pero ya no tengo calor. Estoy muy solo y muy cansado.
+
+Pototita sintió una pena enorme. Se quitó la bufanda y se la puso al dragón alrededor del cuello, aunque le quedó diminuta. Luego destapó el termo y le ofreció un poco de chocolate.
+
+—Bebe, te va a hacer bien.
+
+El dragón probó un sorbito, y sus ojos se abrieron de par en par.
+
+—¡Está calentito! ¡Y es dulce! ¿Qué es esto?
+
+—Es chocolate, y es mejor cuando lo compartes —respondió ella.
+
+Se quedaron un rato conversando. El dragón le contó que lo temían tanto que nadie lo visitaba, y que su fuego se había ido apagando poco a poco, porque el fuego de los dragones no solo vive de leña, sino también de compañía. Pototita le prometió que volvería todos los días.
+
+Y así lo hizo. Cada tarde subía la montaña con chocolate, galletas y cuentos para leerle. Poco a poco, el dragón empezó a sonreír, luego a reír, y un día, mientras Pototita le contaba un chiste, ¡pum! Soltó una llamarada dorada tan bonita que iluminó toda la cueva.
+
+—¡Mi fuego volvió! —gritó, bailando de felicidad.
+
+Al día siguiente, Pototita bajó al pueblo y contó la verdad. Al principio nadie le creyó, pero cuando vieron las chimeneas de la montaña humeando de nuevo, entendieron que el dragón no era un monstruo, sino un amigo solitario.
+
+Desde entonces, cada invierno los habitantes del pueblo suben a visitarlo, llevándole chocolate y música. Y el dragón, a cambio, calienta las casas con su aliento dorado y vigila los caminos para que nadie se pierda en la nieve.
+
+Pototito, que lo sabía todo desde el principio, siempre dice que su amiga es la persona más valiente que conoce.
+
+—No fui valiente —le respondía Pototita, riendo—. Solo tuve ganas de ayudar.
+
+Y esa es la valentía más grande de todas. 🔥💛`},
+{t:'Pototito y la Carta que no Llegó',k:'drama',x:`En un pueblo junto al mar, donde las casas eran de colores y las gaviotas conocían a todos por su nombre, vivía un cartero llamado Pototito. Cada mañana recorría las calles empedradas en su bicicleta azul, entregando cartas, paquetes y noticias, y todos lo querían mucho porque siempre tenía una sonrisa y una palabra amable para cada puerta.
+
+Pero había una puerta a la que Pototito nunca llevaba nada: la de la casita blanca del final del muelle, donde vivía Pototita, una joven pintora que nunca recibía cartas. Y eso, en secreto, le dolía un poquito a Pototito, porque siempre que pasaba la veía sentada frente a su ventana, mirando el horizonte con cierta tristeza.
+
+Un día, entre un montón de sobres, encontró uno distinto: viejo, amarillento, con la letra temblorosa y un sello que no había visto nunca. Decía: «Para Pototita, la que pinta el mar». Tenía la fecha de hacía veinte años.
+
+Pototito se quedó inmóvil. ¿Cómo era posible? Una carta que había viajado dos décadas sin llegar a su destino. ¿Y si era algo importante? ¿Y si ya era demasiado tarde?
+
+Esa noche no pudo dormir. Si se la entregaba, quizá le causaría dolor. Si no lo hacía, jamás sabría lo que decía. Al amanecer, tomó la decisión: la entregaría, aunque le temblaran las manos.
+
+En el muelle, el viento sopló fuerte y por un instante pensó en dar media vuelta. Pero se acordó de la mirada triste de Pototita en la ventana, y tocó la puerta.
+
+Pototita abrió con las manos manchadas de pintura azul.
+
+—Buenos días, cartero. ¿Se perdió? Aquí nunca llega nada.
+
+—Hoy sí —dijo Pototito, y le tendió el sobre con ambas manos—. Es una carta muy antigua. Llegó tarde, pero llegó.
+
+Pototita lo miró y se puso pálida. Reconoció la letra al instante. Se le llenaron los ojos de lágrimas.
+
+—Es de mi abuelo —susurró—. Se fue de viaje cuando yo era pequeña y nunca volvió. Siempre pensé que se había olvidado de mí.
+
+Se sentó en el escalón de la entrada y, con mucho cuidado, abrió el sobre. Pototito se quedó a su lado, sin decir nada, porque a veces lo mejor que se puede hacer es acompañar en silencio.
+
+La carta decía:
+
+«Mi querida Pototita: si lees esto, es que el mar fue amable y trajo mis palabras hasta ti. Quiero que sepas que nunca me olvidé de ti. Cada ola que veo me recuerda tus ojos. Me fui porque tenía que cuidar un faro lejano, pero guardé un secreto para ti: bajo la última tabla del muelle hay una caja con mis pinceles y mis colores. Pinta el mar por los dos. Siempre estaré en cada ola. Tu abuelo que te quiere.»
+
+Pototita lloró mucho, pero no eran lágrimas de pena, sino de un cariño enorme que llevaba veinte años esperando salir. Pototito le ofreció su pañuelo y juntos fueron hasta el final del muelle. Levantaron la última tabla y allí estaba: una cajita de madera con pinceles viejos y tubos de color que aún brillaban.
+
+—Nunca se olvidó de mí —repetía Pototita, sonriendo entre lágrimas—. Nunca.
+
+Desde ese día, Pototita pintó el mar con los pinceles de su abuelo, y sus cuadros se llenaron de una luz distinta, más cálida y profunda. Todos en el pueblo los admiraban. Y Pototito, cada mañana, pasaba por la casita blanca, no para entregar cartas, sino para tomar una taza de té y mirar cómo nacía un nuevo cuadro.
+
+A veces las cosas tardan veinte años en llegar, pero cuando llegan en el momento justo, curan el corazón. Y no hay carta perdida que el amor no encuentre al final. 💙`},
+{t:'Los Dos Farolitos',k:'amor',x:`En una ciudad donde siempre llovía un poquito, había una calle larga y estrecha llena de farolas antiguas. Entre todas ellas, dos eran especiales: un farolito de hierro verde, que se llamaba Pototito, y otro de cobre dorado, que se llamaba Pototita. Estaban uno frente al otro, a ambos lados de la calle, y se conocían desde que los instalaron.
+
+Todas las noches, cuando el sol se iba, los dos encendían sus luces al mismo tiempo, y desde lejos parecía que se saludaban con un guiño.
+
+—Buenas noches, Pototita —decía él, con su luz calentita.
+
+—Buenas noches, Pototito —respondía ella, brillando un poco más.
+
+Eso era todo lo que se decían, porque las farolas no pueden moverse ni cruzar la calle. Pero aquel saludo diario era lo más bonito de sus días. Pototito la miraba sin cansarse: le encantaba cómo su luz dorada bailaba sobre los charcos, cómo iluminaba el rostro de los que pasaban, cómo parecía abrazar a la calle entera.
+
+Con el tiempo, empezaron a hablar de otra manera. Pototito parpadeaba dos veces y Pototita respondía con otras dos. Si él bajaba la luz, ella entendía que estaba triste y brillaba más para consolarlo. Si ella titilaba rápido, él sabía que tenía ganas de reír.
+
+Una noche de invierno, cayó una tormenta tan fuerte que se fue la luz de toda la ciudad. Las farolas se apagaron una por una, y la calle quedó en completa oscuridad. Pototito sintió miedo, no por él, sino por ella. ¿Y si no volvía a verla? ¿Y si la oscuridad se la llevaba?
+
+Pero entonces, en medio de la negrura, vio un resplandor tenue al otro lado de la calle: era Pototita, que, con todas sus fuerzas, se negaba a apagarse. Brillaba débilmente, temblando, pero brillaba.
+
+—¡Pototita! —gritó él—. ¡Descansa! ¡Te vas a agotar!
+
+—No —respondió ella con un titileo valiente—. Si me apago, no podrás verme. Y no quiero que estés solo en la oscuridad.
+
+A Pototito se le llenó el metal de ternura. Reunió todas sus fuerzas, todo el calor de su corazón de bombilla, y encendió su luz también, con un brillo cada vez más fuerte. Y así, los dos juntos, frente a frente, iluminaron la calle entera durante toda la tormenta.
+
+Un niño que volvía tarde a casa vio esas dos luces brillando en la noche y, gracias a ellas, encontró el camino. Una anciana que no podía dormir se asomó a la ventana y sonrió. Un perrito perdido las siguió hasta su hogar. Y en cada rincón de la calle, la gente sintió que el mundo era un lugar más tranquilo.
+
+Cuando amaneció, la tormenta se había ido. Los vecinos, agradecidos, supieron que esas dos farolas habían sido las últimas en rendirse. Alguien dejó flores a sus pies. Otro les colgó una guirnalda. Y el alcalde decidió que nadie las iba a quitar jamás.
+
+Desde entonces, los dos farolitos siguen allí, uno frente a otro, encendiendo sus luces cada noche. Y si pasas por esa calle y los ves parpadear al mismo tiempo, no es casualidad: es su manera de decirse, sin palabras, lo mejor que existe.
+
+—Te quiero, Pototita.
+
+—Y yo a ti, Pototito. 💛`},
+{t:'Pototita y el Zapatito de Cristal',k:'princesa',x:`Había una vez una joven llamada Pototita que trabajaba en la cocina de una casa grande, con una madrastra gruñona y dos hermanastras que no dejaban de pedirle cosas. Pototita nunca se quejaba. Mientras fregaba los platos, cantaba bajito, y los ratoncitos de la despensa se juntaban a escucharla, porque tenía la voz más dulce de todo el reino.
+
+Un día llegó una invitación dorada: el príncipe Pototito daba un gran baile en el palacio, y todas las jovencitas del reino estaban invitadas.
+
+—Tú no vas —dijo la madrastra—. Tienes demasiado trabajo.
+
+Esa noche, cuando las hermanastras se marcharon con sus vestidos de volantes, Pototita se sentó en el escalón de la cocina y lloró un poquito. Entonces, un destello de luz llenó la habitación y apareció una ancianita con una varita que brillaba como una luciérnaga.
+
+—Soy tu hada madrina, querida. Y hoy vas a ir al baile.
+
+Con un toque de varita, una calabaza se volvió carroza, los ratoncitos se volvieron caballos blancos, y el vestido viejo de Pototita se convirtió en un traje azul cielo cubierto de estrellitas. En los pies le aparecieron unos zapatitos de cristal que sonaban como campanillas.
+
+—Pero recuerda —advirtió el hada—: a medianoche el hechizo se acaba. Debes volver antes.
+
+En el palacio todos quedaron boquiabiertos cuando entró Pototita. El príncipe Pototito, que se aburría mortalmente en los bailes porque todos le decían lo mismo, se acercó y le tendió la mano.
+
+—¿Me concedes este baile?
+
+Bailaron toda la noche. Hablaron de libros, de estrellas, de lo rico que sabe el pan recién horneado. Pototito se rió como no se había reído en meses. Pero de pronto, el reloj empezó a dar las doce.
+
+—¡Tengo que irme! —exclamó Pototita, y salió corriendo por las escaleras del palacio. En la carrera se le soltó un zapatito de cristal, pero no se atrevió a volver por él.
+
+Pototito lo encontró brillando en el peldaño, lo recogió con sumo cuidado y lo apretó contra el pecho.
+
+—La encontraré —prometió.
+
+Al día siguiente, recorrió el reino casa por casa, probando el zapatito a todas las jovencitas. A algunas les quedaba grande, a otras pequeño. Cuando llegó a la casa grande, la madrastra encerró a Pototita en el desván.
+
+Pero los ratoncitos, que eran muy listos, le robaron la llave y la liberaron. Pototita bajó corriendo, con las manos manchadas de ceniza y el cabello revuelto.
+
+—¿Puedo probarlo yo? —preguntó.
+
+El zapatito encajó perfectamente. Y entonces Pototita sacó el otro, que llevaba guardado en el bolsillo, y los dos brillaron juntos.
+
+—Eres tú —susurró Pototito, con los ojos llenos de lágrimas felices—. No fue el vestido, ni la carroza. Fueron tu risa y tu forma de mirar lo que me enamoró.
+
+Se casaron en primavera, y Pototita siguió cantando mientras amasaba pan en la cocina del palacio, porque nunca dejó de ser quien era. Y los ratoncitos, por supuesto, fueron los invitados de honor.
+
+Colorín colorado, este cuento se ha acabado... pero tus sueños apenas han comenzado. ✨`},
+{t:'Pototita y la Torre de las Mil Flores',k:'princesa',x:`En lo alto de un acantilado, rodeada de niebla, se alzaba una torre sin puertas ni escaleras. Solo tenía una ventanita en la cima, y allí vivía una joven de cabello larguísimo, tan largo que le daba tres vueltas a la habitación: Pototita.
+
+La cuidaba una anciana llamada Griselda, que venía cada día con comida y le decía que el mundo de afuera era peligroso. Pototita le creyó durante muchos años, pero cada noche miraba por la ventana y soñaba con ver los campos y los ríos que se vislumbraban a lo lejos.
+
+Una tarde, mientras peinaba su cabello, oyó una voz al pie de la torre.
+
+—¡Hola! ¿Hay alguien ahí arriba? —gritó un joven jardinero llamado Pototito, que buscaba semillas raras por las montañas.
+
+Pototita se asomó, asustada y fascinada a la vez.
+
+—¡Hola! —respondió—. No puedo bajar. No hay puerta.
+
+—Entonces yo te subiré el mundo —dijo Pototito, y echó en una canasta unas semillas de girasol, unas ramitas de lavanda y una margarita en maceta.
+
+Pototita bajó su trenza como una cuerda y recogió el cesto. Sus ojos se iluminaron al ver aquellas flores. Nunca había tocado una de verdad.
+
+Desde ese día, Pototito volvió cada tarde con algo nuevo: tierra negra, bulbos de tulipán, un frasquito de abejas amigables. Pototita plantó todo en macetas, y con el tiempo el alféizar de su ventana se llenó de color. La torre gris empezó a vestirse de flores: enredaderas que trepaban por los muros, rosas que colgaban desde el balcón, mariposas que revoloteaban a su alrededor.
+
+Un día, Griselda llegó con la cesta de comida y se quedó inmóvil al ver la torre.
+
+—¿Qué es esto? —preguntó, con la voz temblorosa.
+
+—Es un jardín, Griselda —dijo Pototita con dulzura—. Lo hice con la ayuda de un amigo.
+
+Griselda miró aquellas flores, y de pronto se le llenaron los ojos de lágrimas. Hacía tantos años que no veía nada tan bonito.
+
+—Yo tenía miedo de que te fueras —confesó—. Estaba tan sola antes de que llegaras... Pensé que si el mundo era peligroso, te quedarías conmigo.
+
+Pototita la abrazó fuerte.
+
+—No pienso dejarte sola. Pero necesito poder salir y volver cuando quiera. El cariño verdadero no encierra, Griselda: abre las puertas.
+
+Griselda asintió, llorando. Con un chasquido de dedos, hizo aparecer una puerta de madera en la base de la torre, adornada con enredaderas floridas.
+
+Pototita salió por primera vez, corrió por la hierba descalza y se rió hasta quedarse sin aliento. Pototito la esperaba con un ramo de margaritas.
+
+Desde entonces, los tres cuidaron el jardín juntos: la anciana, la joven y el jardinero. Y la torre quedó convertida en la más bonita de todo el reino, donde cada noche las flores se cerraban para dormir, y los tres hacían lo mismo, felices.
+
+Y si ves una torre florecida en tus sueños, entra sin miedo: allí siempre hay un lugar para ti. 🌻`},
+{t:'Pototita y el Submarino de Burbujas',k:'aventura',x:`Pototita era una inventora de ideas locas. Su último proyecto era un submarino hecho con una enorme burbuja de jabón, reforzada con una cola especial que ella misma había inventado. Su mejor amigo, Pototito, la miraba con cara de duda.
+
+—¿Estás segura de que no va a reventar?
+
+—Casi segura —respondió ella, sonriendo.
+
+Se subieron los dos a la burbuja, cerraron la trampilla y, con un empujón, se deslizaron hacia el mar. Para su sorpresa, la burbuja se hundió suavemente, flotando entre cardúmenes de peces de colores. Por la pared transparente podían verlo todo: corales de neón, caballitos de mar que se enrollaban, estrellas de mar que parecían saludar.
+
+De pronto, escucharon un llanto muy agudo. Siguieron el sonido y descubrieron a una tortuguita bebé atrapada en una red vieja, entre las algas.
+
+—¡Pobrecita! —dijo Pototito—. Hay que liberarla.
+
+Pototita sacó unas tijeritas de su cinturón de inventora y cortó la red con cuidado, mientras Pototito sostenía a la tortuguita. Cuando quedó libre, ella los miró con grandes ojos agradecidos.
+
+—Me llamo Concha —dijo con vocecita—. Me perdí de mi mamá y llevo días buscándola.
+
+—No te preocupes —dijo Pototita—. Te ayudaremos.
+
+Navegaron por el fondo marino siguiendo pistas: una concha rota, un rastro de burbujas, un poco de arena revuelta. En el camino se cruzaron con un pulpo bromista que les hizo un truco de magia con tinta, y con un pez linterna que les iluminó una cueva oscura.
+
+Al final del pasillo, encontraron una caverna enorme en la que dormía un calamar gigante, de ojos grandes como lunas. Concha tembló.
+
+—No tengas miedo —susurró Pototita—. A veces los más grandes son los más tímidos.
+
+Se acercaron despacito, y en vez de despertar con un rugido, el calamar abrió un ojo y habló con una voz suave:
+
+—¿Buscan a alguien? He visto a una tortuga grande llorando cerca del arrecife de coral.
+
+Los llevó hasta allá con un movimiento de sus tentáculos, y allí estaba mamá tortuga, buscando a su hija entre las rocas. Cuando vio a Concha, la abrazó con sus aletas y lloró de alegría.
+
+Como agradecimiento, mamá tortuga los llevó a la superficie sobre su caparazón, mientras el sol se ponía y el mar se volvía dorado.
+
+Pototita y Pototito volvieron a casa con el corazón lleno. Y cada vez que se asomaban al mar, una tortuga pequeñita sacaba la cabeza del agua para saludarlos.
+
+Ahora cierra los ojos y mécete como las olas... que el mar te lleve a dormir. 🌊`},
+{t:'Pototito y el Violín Silencioso',k:'drama',x:`Pototito tocaba el violín como nadie en el pueblo. Cuando pasaba el arco por las cuerdas, hasta los pájaros se quedaban callados para escuchar. Todo lo había aprendido de su abuelo Anselmo, un viejo músico que le enseñó que la música no se toca con las manos, sino con el corazón.
+
+Pero un invierno el abuelo se fue para siempre, y con él pareció irse también la música de Pototito. Guardó el violín en su estuche, el estuche en el armario, y cerró la puerta con llave. Cada vez que intentaba tocar, se le hacía un nudo en la garganta.
+
+Pasaron meses. Pototito dejó de sonreír tanto, dejó de salir a la plaza, y el pueblo, que lo quería, se preocupaba sin saber qué hacer.
+
+Una tarde de primavera, llamó a su puerta Pototita, la hija de la panadera, con una bandeja de pan caliente.
+
+—Mi mamá dice que tienes que comer —dijo, con una sonrisa traviesa—. Y yo digo que necesitas aire.
+
+Lo convenció de salir a pasear por el campo. Caminaron junto al río, mientras ella contaba historias absurdas de su gato, que se había quedado atrapado en una olla. Pototito se rió por primera vez en meses, y se sorprendió de lo bien que se sentía.
+
+—¿Por qué ya no tocas? —preguntó ella de repente.
+
+Pototito calló un momento largo.
+
+—Porque cuando toco, lo extraño más. Es como si su voz estuviera dentro del violín.
+
+Pototita se detuvo y lo miró con ternura.
+
+—Entonces quizá el violín no está callado. Quizá espera a que alguien lo deje hablar.
+
+Esa noche, Pototito abrió el armario. Sacó el estuche con manos temblorosas, y al levantar la tapa encontró una nota doblada que nunca había visto, escrita con la letra de su abuelo: «Cuando yo ya no esté, toca para quien lo necesite. Así seguiré sonando.»
+
+Las lágrimas le rodaron por las mejillas. Apoyó el violín en el hombro y, despacito, dejó que el arco rozara una cuerda. El sonido salió tembloroso, pero hermoso. Luego otra nota, y otra. Poco a poco, la melodía fue llenando la habitación, y Pototito sintió que su abuelo estaba allí, a su lado, sonriendo.
+
+Al día siguiente, tocó en la plaza del pueblo. La gente se detuvo a escuchar. Algunos lloraron, otros sonrieron, y Pototita lo miraba desde el fondo con los ojos brillantes.
+
+Desde entonces, Pototito tocó cada tarde para todos los que pasaban. Y cuando alguien le preguntaba de dónde sacaba tanta emoción, él respondía:
+
+—La música no muere. Se queda en quien la ama.
+
+Y esa noche, antes de dormir, se quedó escuchando el silencio, que ya no dolía, porque estaba lleno de una melodía suave que nunca dejaría de sonar. 🎶`},
+{t:'La Panadería de las Cinco de la Mañana',k:'amor',x:`Pototita era panadera. Cada madrugada, a las tres, se levantaba para encender el horno y amasar pan antes de que saliera el sol. Le gustaba la hora de las cinco, cuando el olor a pan caliente llenaba la calle y el cielo empezaba a ponerse rosado.
+
+Cada mañana, a las cinco en punto, pasaba frente a la panadería un joven con una linterna: Pototito, el vigilante nocturno del pueblo, que terminaba su ronda cansado y con frío. Siempre se detenía un segundo en la ventana, aspiraba hondo el aroma del pan y seguía su camino con una sonrisa.
+
+Pototita lo veía desde adentro, entre la harina y el vapor, y le gustaba esa sonrisa tranquila.
+
+Una madrugada, decidió hacer algo. Metió un panecillo recién horneado en una bolsita de papel, le puso una nota que decía «Para el que cuida nuestro sueño» y la dejó en el alféizar.
+
+Cuando Pototito pasó, se sorprendió. Tomó la bolsita, leyó la nota y sintió que el pecho le brincaba. Probó el pan: estaba tibio, crujiente y dulce. Era el mejor desayuno de su vida.
+
+Al día siguiente, dejó en el mismo alféizar una flor silvestre y una nota: «Gracias. Su pan sabe a hogar.»
+
+Así empezó una historia de notitas y detalles. Ella dejaba un panecillo; él, una florcita. Ella escribía: ¿Qué tal la noche?; él respondía: Estrellada, ¿y el horno? Ella: Caliente, como tu sonrisa. Él: Me sonrojo, panadera.
+
+Pasaron semanas. Sin haber cruzado una palabra en voz alta, ya se conocían mejor que nadie. Ella sabía que él temía a las tormentas y que adoraba la mermelada de moras. Él sabía que ella soñaba con viajar al mar y que hablaba sola mientras amasaba.
+
+Una madrugada de invierno, Pototito llegó antes de las cinco y se quedó de pie frente a la puerta, con las manos heladas y el corazón latiéndole fuerte. Cuando Pototita abrió para sacar la primera tanda de pan, lo encontró allí, con una flor en la mano.
+
+—Hola —dijo él, tímido—. Creo que ya es hora de decir buenos días en persona.
+
+Pototita se rió, con las mejillas rojas y harina en la nariz.
+
+—Pasa, Pototito. Hace frío afuera.
+
+Entró, y por primera vez estuvieron frente a frente, rodeados de calor y olor a pan. Compartieron el desayuno sentados en un banquito, y hablaron hasta que salió el sol por completo.
+
+Desde entonces, cada amanecer se vio la misma escena: un vigilante y una panadera tomando café con pan recién horneado, mirando el cielo rosado desde la ventana. Y la panadería de las cinco de la mañana fue, para siempre, el lugar más cálido del pueblo. 🥐💛`},
+{t:'La Princesa y el Guisante Travieso',k:'princesa',x:`El príncipe Pototito quería casarse con una princesa de verdad, pero todas las que conocía eran un poquito presumidas y no tenían ni idea de cómo era la vida real. Viajó por todo el mundo y no encontró ninguna que le hiciera reír de corazón. Volvió a casa muy desanimado.
+
+Una noche de tormenta, con rayos y truenos, alguien tocó con fuerza el portón del castillo. El rey abrió y encontró a una joven completamente empapada, con las botas llenas de barro y el sombrero chorreando.
+
+—Buenas noches —dijo ella, con una sonrisa enorme—. Me llamo Pototita y soy una princesa. Bueno, creo. La verdad es que vengo de una granja, pero mi abuela siempre decía que yo era la princesa de la casa.
+
+La reina, que era muy desconfiada, frunció el ceño.
+
+—Lo comprobaremos esta noche.
+
+Mandó poner un guisante minúsculo sobre la cama de la habitación de invitados y luego apiló encima veinte colchones de lana y veinte edredones de plumas. Pototita subió por una escalera, riendo, y se acostó.
+
+A la mañana siguiente, todos esperaban en el comedor.
+
+—¿Cómo dormiste, querida? —preguntó la reina.
+
+—¡Fatal! —respondió Pototita, frotándose la espalda—. Había algo duro en mi cama. Tengo moretones. Creo que era un guisante.
+
+Todos se quedaron boquiabiertos. Solo una verdadera princesa podría sentir un guisante a través de veinte colchones.
+
+Pero Pototita no había terminado.
+
+—Y además, ¡era un guisante muy sano! En mi granja cultivo guisantes todos los días y te puedo decir que ese estaba en su punto. ¿Me lo pueden devolver? Quiero plantarlo.
+
+El príncipe Pototito soltó una carcajada tan fuerte que casi se cae de la silla. Nunca había conocido a nadie así: una joven que sentía un guisante bajo veinte colchones y que, en vez de quejarse del castillo, veía en él una oportunidad para sembrar.
+
+—Esa es la princesa que quiero —dijo, aplaudiendo.
+
+El guisante fue plantado en el jardín real. Creció y creció hasta formar una enredadera gigante que subía por la torre más alta, llena de vainas verdes y flores blancas. Pototita y Pototito se casaron bajo esa enredadera, y cada primavera todo el reino comía sopa de guisantes en su honor.
+
+Y colorin colorado... ¡qué sueño tan rico has llevado! 🌱`},
+{t:'Pototito y el Mapa de los Mil Colores',k:'aventura',x:`Un lunes por la mañana, los habitantes del Valle Alegre se despertaron y descubrieron que todos los colores se habían ido. Las rosas eran grises, el cielo era gris, hasta el helado de fresa era gris. El pueblo entero estaba triste.
+
+Pototito, que vivía en una casita junto al río, encontró en su buzón un pergamino arrugado. Era un mapa antiguo con una nota: «Los colores están en la Montaña Arcoíris. Quien los traiga de vuelta deberá ser valiente y tener buen corazón.»
+
+—Yo iré —dijo Pototito, y su amiga Pototita levantó la mano.
+
+—Y yo también. No pienso dejarte ir solo.
+
+Llenaron una mochila con sándwiches y empezaron a caminar. Primero atravesaron el Bosque Susurrante, donde los árboles murmuraban consejos. Un roble anciano les dijo: «No se dejen llevar por el miedo, que el camino es largo pero hermoso». Después cruzaron el Río Burbujeante en una balsa de troncos, esquivando peces saltarines que les gastaban bromas.
+
+Al tercer día llegaron al pie de la montaña, donde un troll gris y gigantesco les cerró el paso.
+
+—¡Nadie pasa! —rugió—. Yo me llevé los colores porque estaba triste, y quiero guardarlos conmigo.
+
+Pototita se acercó despacito, sin miedo.
+
+—¿Por qué estás triste?
+
+El troll se sentó de golpe y las rocas temblaron.
+
+—Porque soy gris. Siempre he sido gris. Todos los demás tienen colores y yo no. Pensé que si me los quedaba, yo también sería bonito.
+
+Pototito y Pototita se miraron. Luego sacaron de la mochila sus pinturas de acuarela, que habían traído por si acaso.
+
+—¿Sabes qué? —dijo Pototito—. Los colores no se guardan: se comparten. Ven, te pintamos.
+
+Con pinceles y cariño, le dibujaron al troll flores en los brazos, un sol en la barriga y un arcoíris sobre la cabeza. El troll se miró en un charco y no pudo evitar sonreír.
+
+—¡Soy el troll más bonito del mundo!
+
+De pura felicidad, abrió un enorme cofre que llevaba escondido y los colores salieron volando como mil pájaros: rojos, naranjas, amarillos, verdes, azules, violetas. Volaron hacia el valle y pintaron todo a su paso. Las rosas volvieron a ser rojas, el cielo azul, y el helado de fresa, rosado y delicioso.
+
+El troll bajó con ellos al valle, y desde entonces vive junto al río, pintando murales en las casas de los vecinos. Y Pototito y Pototita guardaron el mapa en un marco, para recordar que la aventura más grande no es encontrar un tesoro, sino devolverle la alegría a alguien.
+
+Buenas noches, y que tus sueños tengan todos los colores. 🎨`},
+{t:'Pototito y la Casa que Esperaba',k:'drama',x:`En lo alto de una colina, rodeada de un jardín salvaje, había una casa vieja que llevaba muchos años vacía. Las ventanas estaban sucias, el tejado tenía goteras, y la puerta crujía con el viento. Los niños del pueblo creían que estaba embrujada y no se acercaban.
+
+Pero la casa no estaba embrujada. Estaba triste. Había sido, hacía mucho, el hogar de una familia que la llenaba de risas, de olor a pan y de pasos corriendo por la escalera. Cuando se fueron, nadie volvió. Y la casa se quedó esperando, año tras año, con la esperanza de oír de nuevo una voz en sus pasillos.
+
+Un día de otoño, un niño llamado Pototito subió la colina siguiendo a su perro, que se había escapado. El animal se coló por una ventana rota, y Pototito, preocupado, entró detrás.
+
+Dentro, el polvo flotaba en rayos de luz dorada. Había muebles cubiertos con sábanas blancas, cuadros torcidos en las paredes y un piano cerrado en el salón. Pototito sintió algo extraño: no era miedo, sino una especie de ternura, como si la casa lo estuviera abrazando.
+
+—Hola —dijo, sin saber por qué—. No te preocupes. No voy a hacerte daño.
+
+Las paredes crujieron suavemente, como un suspiro.
+
+Desde ese día, Pototito volvió cada tarde. Barrió el polvo, abrió las ventanas, arregló los escalones sueltos. Un día llevó a su amiga Pototita, que se ofreció a pintar las paredes. Juntos limpiaron el jardín, arrancaron la mala hierba, plantaron flores nuevas.
+
+La casa los miraba trabajar y se iba llenando de una alegría que no recordaba. Cuando Pototita tocó las teclas del piano por primera vez, una melodía dulce y polvorienta llenó todas las habitaciones, y las ventanas brillaron como ojos húmedos.
+
+Un día, Pototito llevó a sus padres a ver la casa.
+
+—¿Sabes qué, hijo? —dijo su mamá, mirando alrededor con los ojos brillantes—. Esta casa tiene algo especial. Parece que quiere ser un hogar.
+
+Su familia llevaba tiempo buscando dónde vivir, y sin pensarlo mucho decidieron quedarse. Esa misma semana llevaron sus muebles, colgaron cortinas, encendieron la chimenea. Por la noche, cuando la familia se sentó a cenar, la casa sintió por fin lo que tanto había esperado: voces, risas, platos tintineando, pasos de niño subiendo la escalera.
+
+Esa noche, mientras todos dormían, las vigas suspiraron de felicidad. Ya no estaba sola.
+
+Pototito, desde su cama, escuchó ese susurro y sonrió.
+
+—Buenas noches, casa —murmuró—. Ya llegamos.
+
+Y la casa, a su manera, respondió con una brisa tibia que le acarició la cara. Porque nada hay más triste que esperar solo, y nada más dulce que ser, por fin, encontrado. 🌙`},
+{t:'La Luciérnaga y la Estrella',k:'amor',x:`Había una vez una luciérnaga llamada Pototito, pequeñita y tímida, que vivía en un prado a la orilla de un lago. Todas las noches encendía su lucecita y volaba entre los juncos, pero se sentía muy solo, porque las demás luciérnagas ya tenían pareja.
+
+Una noche despejada, miró al cielo y vio algo que le cortó el aliento: una estrella enorme y brillante, distinta a todas. Parecía sonreírle. Era Pototita, la estrella más dulce del firmamento.
+
+Pototito quedó hechizado. Desde ese día, cada noche salía a mirarla y le hablaba bajito, sin esperar respuesta.
+
+—Hola, estrella —decía—. Hoy fue un día tranquilo. Vi dos mariposas bailando. Me acordé de ti.
+
+La estrella, que escuchaba desde lo alto, sentía una calidez nueva. Nunca nadie le había hablado con tanto cariño. Para responderle, empezó a brillar un poquito más fuerte cada vez que él hablaba, y Pototito, al notarlo, se llenó de ilusión.
+
+Una noche, decidió hacer algo imposible. Se lanzó al vuelo, subiendo, subiendo, intentando llegar hasta ella. Pasó sobre los árboles, sobre las colinas, sobre las nubes bajas. Se cansó, le dolían las alitas, pero no se detuvo. Un búho que dormía en una rama lo miró desde arriba.
+
+—Pequeño, no podrás llegar. Las estrellas están demasiado lejos.
+
+—Lo sé —respondió Pototito, jadeando—. Pero quiero que sepa que no está sola.
+
+El búho se conmovió y extendió un ala para que Pototito descansara un momento. Luego lo llevó hasta la rama más alta del árbol más alto del bosque. Desde allí, Pototito se encendió con toda su luz, hasta que su cuerpecito brilló como una estrellita nueva.
+
+Arriba, Pototita lo vio. Lo vio brillar con todas sus fuerzas, tan chiquito y tan valiente. Y entonces hizo algo que nunca antes: dejó caer un rayo de su luz, largo y suave, que bajó desde el cielo hasta la rama y envolvió a la luciérnaga en un abrazo tibio.
+
+—Gracias —susurró la estrella—. Por mirarme cada noche.
+
+Desde entonces, cuando el lago está en calma, se puede ver reflejada una estrella grande y, a su lado, una luciérnaga chiquita. Parecen estar juntas, aunque una esté en el cielo y la otra en la tierra. Porque el amor verdadero no entiende de distancias: se encuentra en un rayo de luz y en un pensamiento de cada noche.
+
+Ahora mira por la ventana, y si ves dos lucecitas brillar juntas, dales las buenas noches. 🌙`}
+];
+var ORD=['princesa','aventura','drama','amor'];STORIES.sort(function(a,b){return ORD.indexOf(a.k)-ORD.indexOf(b.k)});
+var TYPES={princesa:['👑','Princesas'],aventura:['🗺️','Aventura'],drama:['🎭','Drama'],amor:['💞','Amor']};
+var curType=null,stSeen=[],fs=1.05;try{stSeen=JSON.parse(localStorage.getItem('seenS')||'[]')}catch(e){}
+Object.keys(TYPES).forEach(function(k){var b=document.createElement('button');b.className='chip';b.textContent=TYPES[k][0]+' '+TYPES[k][1];b.onclick=function(){var on=curType===k;curType=on?null:k;document.querySelectorAll('#stypes .chip').forEach(function(x){x.classList.remove('on')});if(!on)b.classList.add('on');burst(b,TYPES[k][0]);listStories()};$('stypes').appendChild(b)});
+function pool(){return STORIES.filter(function(s){return !curType||s.k===curType})}
+function listStories(){var l=$('slist');l.innerHTML='';pool().forEach(function(s){var b=document.createElement('button');b.className='sitem';b.textContent=(stSeen.indexOf(s.t)>=0?'✅ ':TYPES[s.k][0]+' ')+s.t;b.onclick=function(){openStory(s)};l.appendChild(b)})}
+function openStory(s){window.curStory=s;if(stSeen.indexOf(s.t)<0){stSeen.push(s.t);try{localStorage.setItem('seenS',JSON.stringify(stSeen))}catch(e){}}$('stitle').textContent=s.t;var t=$('stext');t.innerHTML='';s.x.split('\n\n').forEach(function(p){var e=document.createElement('p');e.textContent=p;t.appendChild(e)});$('reader').style.display='block';$('sdone').style.display='none';if(window.speechSynthesis)speechSynthesis.cancel();$('sspeak').textContent='🔊 Escuchar';listStories();$('reader').scrollIntoView({behavior:'smooth'});refresh()}
+$('srand').onclick=function(){var p=pool(),f=p.filter(function(s){return stSeen.indexOf(s.t)<0});if(!f.length){stSeen=[];f=p}openStory(R(f))};
+$('sbig').onclick=function(){fs=Math.min(1.7,fs+.1);$('stext').style.fontSize=fs+'rem'};
+$('ssm').onclick=function(){fs=Math.max(.9,fs-.1);$('stext').style.fontSize=fs+'rem'};
+$('snight').onclick=function(){$('reader').classList.toggle('night')};
+$('sspeak').onclick=function(){var ss=window.speechSynthesis;if(!ss)return;if(ss.speaking){ss.cancel();this.textContent='🔊 Escuchar';return}var u=new SpeechSynthesisUtterance($('stitle').textContent+'. '+$('stext').innerText);u.lang='es-ES';u.rate=.85;var b=this;u.onend=function(){b.textContent='🔊 Escuchar'};ss.speak(u);b.textContent='⏹️ Parar'};
+$('sfin').onclick=function(){$('sdone').style.display='block';burst(this,'😴');burst(this,'🌙');if(window.speechSynthesis)speechSynthesis.cancel()};
+listStories();
 var f=$("floaty"),em=["💗","💖","✨","🌸","💕","🦋"];
 for(var i=0;i<16;i++){var s=document.createElement("span");s.textContent=em[i%em.length];s.style.left=Math.random()*100+"%";s.style.fontSize=(14+Math.random()*22)+"px";s.style.animationDuration=(9+Math.random()*10)+"s";s.style.animationDelay=(-Math.random()*15)+"s";f.appendChild(s)}
 </script>
